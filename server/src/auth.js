@@ -28,10 +28,11 @@ export function verifyToken(token) {
     // migration were signed with the legacy Rubicon fallback secret. Accept
     // those sessions only as a short-lived migration bridge (JWT expiration
     // still applies), while all new tokens use JWT_SECRET.
-    if (!process.env.JWT_SECRET) {
+    try {
       return jwt.verify(token, LEGACY_JWT_SECRET);
+    } catch {
+      throw primaryError;
     }
-    throw primaryError;
   }
 }
 
