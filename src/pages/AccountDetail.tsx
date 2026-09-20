@@ -183,7 +183,7 @@ export default function AccountDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-surface">
+      <div className="finance-page finance-account">
         <SkipLink />
         <main id="main-content" className="w-full max-w-4xl mx-auto px-4 sm:px-6 pt-16">
           <LoadingState label="Loading your account…" />
@@ -393,7 +393,7 @@ export default function AccountDetail() {
             </div>
           </div>
           <p className="mt-4 text-caption text-content-muted">
-            Bank: Rubicon Capital · Use these details for same-currency transfers on the platform.
+            Bank: Finance Capital Florida · Use these details for same-currency transfers on the platform.
           </p>
         </Card>
 
