@@ -146,7 +146,7 @@ export default function Dashboard() {
   const primaryBalance = totalByCurrency[primaryCurrency] || 0;
 
   return (
-    <div className="min-h-screen bg-[#070b14] text-white flex flex-col">
+    <div className="finance-dashboard min-h-screen flex flex-col">
       <SkipLink />
 
       <header
@@ -157,7 +157,7 @@ export default function Dashboard() {
       >
         <div className="w-full max-w-sm mx-auto px-4 sm:max-w-md md:max-w-2xl lg:max-w-4xl">
           <div className="h-16 flex items-center justify-between gap-3">
-            <Link to="/dashboard" aria-label="Rubicon Capital home" className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400">
+            <Link to="/dashboard" aria-label="Finance Capital Florida home" className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400">
               <BrandLogo size={32} withWordmark />
             </Link>
             <div className="flex items-center gap-1.5">
@@ -394,7 +394,7 @@ export default function Dashboard() {
         </section>
 
         <footer className="mt-10 pt-6 border-t border-white/5 text-center">
-          <p className="text-[11px] text-slate-600">© {new Date().getFullYear()} Rubicon Capital</p>
+          <p className="text-[11px] text-slate-600">© {new Date().getFullYear()} Finance Capital Florida</p>
         </footer>
       </main>
 
