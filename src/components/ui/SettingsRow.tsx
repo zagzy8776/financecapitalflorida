@@ -31,21 +31,21 @@ export function SettingsRow({ icon: Icon, label, value, trailing, onClick, badge
         'w-full flex items-center gap-4 px-5 py-4 text-left transition-colors duration-fast ease-standard',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-1 focus-visible:ring-offset-surface',
         interactive
-          ? 'hover:bg-surface-overlay/50 active:bg-surface-overlay/70 cursor-pointer'
+          ? 'hover:bg-[#f7f9fb] active:bg-[#f1f4f7] cursor-pointer'
           : 'cursor-default',
         className,
       )}
     >
       {/* Leading icon */}
-      <span className="w-10 h-10 rounded-control bg-surface-overlay/60 flex items-center justify-center shrink-0">
-        {badge ?? <Icon className="w-5 h-5 text-content-secondary" aria-hidden="true" />}
+      <span className="w-10 h-10 rounded-xl bg-[#eef2f6] flex items-center justify-center shrink-0">
+        {badge ?? <Icon className="w-5 h-5 text-[#52657c]" aria-hidden="true" />}
       </span>
 
       {/* Label + value */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-content-primary">{label}</p>
+        <p className="text-sm font-medium text-[#10243f]">{label}</p>
         {value && (
-          <p className="text-caption text-content-muted mt-0.5 truncate">{value}</p>
+          <p className="text-caption text-[#7a8798] mt-0.5 truncate">{value}</p>
         )}
       </div>
 
@@ -68,7 +68,7 @@ export function SettingsSection({ title, children }: { title?: string; children:
           {title}
         </h3>
       )}
-      <div className="rounded-card border border-line-subtle bg-surface-raised/40 overflow-hidden divide-y divide-line-subtle">
+      <div className="rounded-[18px] border border-[#e4e8ee] bg-white overflow-hidden divide-y divide-[#edf0f4] shadow-[0_8px_28px_rgba(16,36,63,.045)]">
         {children}
       </div>
     </section>
