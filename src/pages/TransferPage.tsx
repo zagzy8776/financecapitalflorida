@@ -85,7 +85,7 @@ export default function TransferPage() {
     let dead = false;
     const t = setTimeout(async () => {
       try {
-        const token = localStorage.getItem('rubicon_token');
+        const token = localStorage.getItem('finance_capital_token');
         const res = await fetch(`/api/transfers/lookup?number=${encodeURIComponent(cleaned)}`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
@@ -160,7 +160,7 @@ export default function TransferPage() {
   };
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="finance-page finance-transfer">
       <PageHeader title="Transfers" subtitle="Send money from your accounts" backTo="/dashboard" />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6 pb-28 space-y-6">
         <Card className="p-6">
