@@ -93,7 +93,7 @@ export default function ProfilePage() {
     setBusy(true);
     setError('');
     try {
-      const token = localStorage.getItem('finance_capital_token');
+      const token = localStorage.getItem('rubicon_token');
       const res = await fetch('/api/profile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
