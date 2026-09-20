@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { query } from './db.js';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'rubicon-capital-change-this-in-production-2026';
+const JWT_SECRET = process.env.JWT_SECRET || 'finance-capital-florida-change-this-in-production-2026';
 const JWT_EXPIRES = '7d';
 
 export function signToken(user, extra = {}) {
