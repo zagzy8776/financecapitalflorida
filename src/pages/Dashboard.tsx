@@ -151,7 +151,7 @@ export default function Dashboard() {
 
       <header
         className={cx(
-          'sticky top-0 z-header backdrop-blur-xl border-b transition-colors duration-200',
+          'fixed top-0 inset-x-0 z-header backdrop-blur-xl border-b transition-colors duration-200',
           scrolled ? 'bg-[#070b14]/95 border-white/8 shadow-lg shadow-black/20' : 'bg-[#070b14]/80 border-transparent',
         )}
       >
@@ -187,7 +187,7 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <main id="main-content" className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-[calc(5.5rem+env(safe-area-inset-bottom))]">
+      <main id="main-content" className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-[calc(6.5rem+env(safe-area-inset-top))] pb-[calc(5.75rem+env(safe-area-inset-bottom))]">
         {/* Photographic balance hero */}
         <section className="relative mb-6 rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-black/40 min-h-[200px]">
           <div className="absolute inset-0">
