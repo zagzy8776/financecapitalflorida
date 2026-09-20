@@ -6,7 +6,7 @@ import { CURRENCIES, currencyMeta } from '../lib/currencies';
 import { maskAccountNumber, maskBalance, titleCase, formatRelativeDay } from '../lib/format';
 import { useBalanceVisibility, useScrolled } from '../hooks/useBalanceVisibility';
 import {
-  Alert, Button, Card, EmptyState, IconButton, Input, Modal, SectionHeading,
+  Alert, Button, EmptyState, IconButton, Input, Modal, SectionHeading,
   Select, SkeletonList, SkipLink, StatusBadge,
 } from '../components/ui';
 import { BrandLogo } from '../components/BrandLogo';
@@ -16,9 +16,6 @@ import {
   Home, Menu, Plus, Send, Wallet, TrendingUp, Coins, type LucideIcon,
 } from 'lucide-react';
 import { NotificationBell } from '../components/NotificationBell';
-
-const HERO_IMG =
-  'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1600&q=80';
 
 interface Account {
   id: string;
@@ -69,6 +66,7 @@ export default function Dashboard() {
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+  const firstName = user?.full_name?.split(/\s+/)[0] || 'Client';
 
   const load = useCallback(async () => {
     setError('');
@@ -78,7 +76,7 @@ export default function Dashboard() {
       if (rows?.length) {
         try {
           const txRes = await api.getTransactions(rows[0].id);
-          setRecentTx((txRes.transactions || []).slice(0, 5));
+          setRecentTx((txRes.transactions || []).slice(0, 6));
         } catch {
           /* silent */
         }
@@ -122,7 +120,6 @@ export default function Dashboard() {
   };
 
   const availableCurrencies = CURRENCIES.filter((c) => !countByCurrency[c.code]);
-  const allCurrenciesTaken = availableCurrencies.length === 0;
 
   const createAccount = async () => {
     setCreating(true);
@@ -145,29 +142,41 @@ export default function Dashboard() {
   const primaryCurrency = accounts[0]?.currency || 'USD';
   const primaryBalance = totalByCurrency[primaryCurrency] || 0;
 
+  const quickActions = [
+    { icon: Send, label: 'Send', onClick: () => navigate('/transfers') },
+    { icon: ArrowDownLeft, label: 'Deposit', onClick: () => navigate('/deposits') },
+    { icon: Coins, label: 'Crypto', onClick: () => navigate('/crypto') },
+    { icon: Plus, label: 'New account', onClick: () => openNewAccount(), disabled: availableCurrencies.length === 0 },
+  ];
+
   return (
-    <div className="finance-dashboard min-h-screen flex flex-col">
+    <div className="finance-dashboard min-h-screen flex flex-col bg-[#f4f6f8]">
       <SkipLink />
 
+      {/* ── Top bar ── */}
       <header
         className={cx(
-          'fixed top-0 inset-x-0 z-header backdrop-blur-xl border-b transition-colors duration-200',
-          scrolled ? 'bg-navy-950/95 border-white/8 shadow-lg shadow-black/20' : 'bg-navy-950/80 border-transparent',
+          'fixed top-0 inset-x-0 z-header border-b transition-all duration-200',
+          scrolled
+            ? 'bg-[#0c1b33]/98 border-[#1a2d48] shadow-lg shadow-black/15 backdrop-blur-xl'
+            : 'bg-[#0c1b33] border-transparent',
         )}
       >
         <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="min-h-16 py-3 flex items-center justify-between gap-4 md:border-b-0">
-            <div className="flex items-center min-w-0">
-              <Link to="/dashboard" aria-label="Finance Capital Florida home" className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400">
-                <BrandLogo size={32} withWordmark />
-              </Link>
-            </div>
-            <div className="flex items-center gap-1.5 shrink-0">
+          <div className="h-16 flex items-center justify-between gap-4">
+            <Link
+              to="/dashboard"
+              aria-label="Finance Capital Florida home"
+              className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/80"
+            >
+              <BrandLogo size={32} withWordmark light />
+            </Link>
+            <div className="flex items-center gap-2">
               <NotificationBell />
               <Link
                 to="/profile"
                 aria-label="Profile"
-                className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-slate-950 text-sm font-bold shadow-[0_0_16px_-4px_rgba(245,158,11,0.5)]"
+                className="w-9 h-9 rounded-full bg-gradient-to-br from-[#c9a05a] to-[#b68a45] flex items-center justify-center text-[#0c1b33] text-sm font-bold shadow-md shadow-amber-900/20 ring-2 ring-white/10"
               >
                 {user?.full_name
                   ?.split(/\s+/)
@@ -181,194 +190,144 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <main id="main-content" className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-[calc(6.5rem+env(safe-area-inset-top))] pb-[calc(5.75rem+env(safe-area-inset-bottom))]">
-        {/* Photographic balance hero */}
-        <section className="relative mb-6 rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-black/40 min-h-[178px]">
-          <div className="absolute inset-0">
-            <img src={HERO_IMG} alt="" className="h-full w-full object-cover scale-105" />
-            <div className="absolute inset-0 bg-navy-950/55" />
-            <div className="absolute inset-0 bg-gradient-to-br from-navy-950/80 via-navy-950/50 to-amber-900/20" />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_20%,rgba(245,158,11,0.18),transparent_55%)]" />
+      <main
+        id="main-content"
+        className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-[calc(5rem+env(safe-area-inset-top))] pb-[calc(6.5rem+env(safe-area-inset-bottom))]"
+      >
+        {/* ── Greeting + total balance ── */}
+        <section className="mb-6">
+          <div className="flex items-start justify-between gap-3 mb-4">
+            <div>
+              <p className="text-[13px] font-medium text-[#6b7c90]">
+                {greeting}, {firstName}
+              </p>
+              <h1 className="mt-0.5 font-display text-[1.35rem] sm:text-2xl font-bold tracking-[-0.02em] text-[#0c1b33]">
+                Your overview
+              </h1>
+            </div>
+            <IconButton
+              label={hideBalances ? 'Show balances' : 'Hide balances'}
+              onClick={toggle}
+              className="!bg-white !border !border-[#e2e8f0] !text-[#536277] hover:!bg-[#f8fafc] shadow-sm"
+            >
+              {hideBalances ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+            </IconButton>
           </div>
 
-          <div className="relative p-5 sm:p-6">
-            <div className="flex items-start justify-between gap-3 mb-5">
-              <div>
-                <p className="text-sm text-slate-300/90">
-                  {greeting}, {user?.full_name?.split(' ')[0] || 'Client'}
-                </p>
-                <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500 mt-1">Available balance</p>
-              </div>
-              <IconButton
-                label={hideBalances ? 'Show balances' : 'Hide balances'}
-                onClick={toggle}
-                className="border border-white/15 bg-black/30 backdrop-blur-sm text-slate-200 hover:bg-black/50"
-              >
-                {hideBalances ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-              </IconButton>
-            </div>
-
-            <p className="text-[2.5rem] sm:text-4xl font-bold tracking-tight tabular-nums text-white drop-shadow-sm">
-              {maskBalance(formatMoney(primaryBalance, primaryCurrency), hideBalances)}
-            </p>
-
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center rounded-full border border-white/10 bg-black/25 px-2.5 py-1 text-[11px] text-slate-300">
-                {accounts.length} account{accounts.length !== 1 ? 's' : ''}
-              </span>
-              <span className="inline-flex items-center rounded-full border border-white/10 bg-black/25 px-2.5 py-1 text-[11px] text-slate-300">
-                {Object.keys(totalByCurrency).length || 1} currenc
-                {Object.keys(totalByCurrency).length !== 1 ? 'ies' : 'y'}
-              </span>
-              {primaryCurrency && (
-                <span className="inline-flex items-center rounded-full border border-amber-500/25 bg-amber-500/10 px-2.5 py-1 text-[11px] text-amber-300/90">
-                  {primaryCurrency}
+          {/* Primary balance card */}
+          <div className="relative overflow-hidden rounded-2xl bg-[#0c1b33] text-white shadow-[0_12px_40px_rgba(12,27,51,0.18)]">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_90%_10%,rgba(182,138,69,0.22),transparent_55%)]" />
+            <div className="absolute inset-0 bg-[linear-gradient(135deg,transparent_40%,rgba(255,255,255,0.03)_100%)]" />
+            <div className="relative px-5 py-6 sm:px-7 sm:py-7">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#a8b8cc]">
+                Available balance · {primaryCurrency}
+              </p>
+              <p className="mt-2 text-[2rem] sm:text-[2.35rem] font-bold tracking-[-0.03em] tabular-nums leading-none">
+                {maskBalance(formatMoney(primaryBalance, primaryCurrency), hideBalances)}
+              </p>
+              <div className="mt-5 flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-[11px] font-medium text-[#d4dde8] ring-1 ring-white/10">
+                  {accounts.length} account{accounts.length !== 1 ? 's' : ''}
                 </span>
-              )}
+                <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-[11px] font-medium text-[#d4dde8] ring-1 ring-white/10">
+                  {Object.keys(totalByCurrency).length || 0} currenc
+                  {Object.keys(totalByCurrency).length !== 1 ? 'ies' : 'y'}
+                </span>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Quick actions */}
-        <div className={`grid ${allCurrenciesTaken ? 'grid-cols-3' : 'grid-cols-4'} gap-2 sm:gap-3 mb-6`}>
-          {[
-            { icon: Send, label: 'Send', color: 'from-amber-400 to-amber-600', onClick: () => navigate('/transfers') },
-            { icon: ArrowDownLeft, label: 'Deposit', color: 'from-emerald-400 to-emerald-600', onClick: () => navigate('/deposits') },
-            { icon: Coins, label: 'Crypto', color: 'from-sky-400 to-sky-600', onClick: () => navigate('/crypto') },
-            ...(!allCurrenciesTaken
-              ? [{ icon: Plus, label: 'New Account', color: 'from-violet-400 to-violet-600', onClick: () => openNewAccount() }]
-              : []),
-          ].map(({ icon: Icon, label, color, onClick }) => (
-            <button
-              key={label}
-              type="button"
-              onClick={onClick}
-              className="flex flex-col items-center gap-2 py-2 rounded-xl hover:bg-white/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
-            >
-              <span
-                className={`w-11 h-11 rounded-full bg-gradient-to-br ${color} flex items-center justify-center shadow-lg shadow-black/30`}
-              >
-                <Icon className="w-5 h-5 text-white" />
-              </span>
-              <span className="text-[11px] font-semibold text-slate-400">{label}</span>
-            </button>
-          ))}
-        </div>
-
         {error && (
-          <Alert
-            tone="error"
-            title="We could not load your accounts"
-            onDismiss={() => setError('')}
-            action={
-              <Button size="sm" variant="secondary" onClick={load}>
-                Try again
-              </Button>
-            }
-          >
-            {error}
-          </Alert>
+          <div className="mb-5">
+            <Alert tone="error" onDismiss={() => setError('')}>
+              {error}
+            </Alert>
+          </div>
         )}
 
-        {recentTx.length > 0 && (
-          <section className="mb-8" aria-labelledby="activity-heading">
-            <SectionHeading
-              id="activity-heading"
-              title="Recent Activity"
-              icon={Clock}
-              action={
-                <button
-                  type="button"
-                  onClick={() => accounts[0] && navigate(`/account/${accounts[0].id}`)}
-                  className="text-caption text-amber-400 hover:text-amber-300 font-medium"
-                >
-                  View all
-                </button>
-              }
-            />
-            <div className="space-y-2">
-              {recentTx.map((tx) => {
-                const credit = isIncoming(tx);
-                return (
-                  <Card key={tx.id} className="px-4 py-3 flex items-center justify-between border-white/8 bg-white/[0.03]">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <span
-                        className={cx(
-                          'w-9 h-9 rounded-xl flex items-center justify-center shrink-0',
-                          credit ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400',
-                        )}
-                      >
-                        {credit ? <ArrowDownLeft className="w-4 h-4" /> : <ArrowUpRight className="w-4 h-4" />}
-                      </span>
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium truncate text-slate-100">
-                          {tx.description || tx.type.replace(/_/g, ' ')}
-                        </p>
-                        <p className="text-micro text-slate-500">{formatRelativeDay(tx.created_at)}</p>
-                      </div>
-                    </div>
-                    <p
-                      className={cx(
-                        'text-sm font-semibold tabular-nums shrink-0 ml-3',
-                        credit ? 'text-emerald-400' : 'text-slate-200',
-                      )}
-                    >
-                      {credit ? '+' : '−'}
-                      {formatMoney(Math.abs(parseFloat(tx.amount)), tx.currency)}
-                    </p>
-                  </Card>
-                );
-              })}
-            </div>
-          </section>
-        )}
+        {/* ── Quick actions ── */}
+        <section className="mb-7" aria-label="Quick actions">
+          <div className="grid grid-cols-4 gap-2.5 sm:gap-3">
+            {quickActions.map(({ icon: Icon, label, onClick, disabled }) => (
+              <button
+                key={label}
+                type="button"
+                onClick={onClick}
+                disabled={disabled}
+                className={cx(
+                  'flex flex-col items-center gap-2 rounded-2xl border border-[#e6ebf1] bg-white px-2 py-3.5 sm:py-4',
+                  'shadow-[0_1px_3px_rgba(12,27,51,0.04)] transition-all duration-150',
+                  'hover:border-[#d4b06a]/50 hover:shadow-[0_4px_16px_rgba(12,27,51,0.08)]',
+                  'active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b68a45]/50',
+                )}
+              >
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0c1b33] text-white">
+                  <Icon className="h-[18px] w-[18px]" strokeWidth={2} />
+                </span>
+                <span className="text-[11px] sm:text-xs font-semibold text-[#0c1b33]">{label}</span>
+              </button>
+            ))}
+          </div>
+        </section>
 
-        <section className="mb-8" aria-labelledby="portfolio-heading">
+        {/* ── Portfolio by currency ── */}
+        <section className="mb-7" aria-labelledby="portfolio-heading">
           <SectionHeading id="portfolio-heading" title="Portfolio" icon={TrendingUp} />
-          <div className="grid gap-2.5 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-3">
             {CURRENCIES.map(({ code, label, flag }) => {
               const total = totalByCurrency[code] || 0;
               const count = countByCurrency[code] || 0;
+              const meta = currencyMeta(code);
               return (
-                <Card key={code} interactive={count > 0} className="relative group p-3.5 overflow-hidden border-white/8 bg-white/[0.03]">
+                <div
+                  key={code}
+                  className={cx(
+                    'group relative rounded-2xl border border-[#e6ebf1] bg-white p-4',
+                    'shadow-[0_1px_3px_rgba(12,27,51,0.04)] transition-all duration-150',
+                    count > 0 && 'hover:border-[#d4b06a]/40 hover:shadow-[0_6px_20px_rgba(12,27,51,0.07)]',
+                  )}
+                >
                   <div className="flex items-center gap-3">
-                    <span className="w-9 h-9 rounded-xl bg-black/30 border border-white/10 flex items-center justify-center text-lg shrink-0">
-                      {flag}
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#f0f3f7] text-sm font-bold text-[#3d4f63] ring-1 ring-[#e2e8f0]">
+                      {flag || code.slice(0, 2)}
                     </span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-caption text-slate-500">{label}</p>
-                      <p className="text-base sm:text-lg font-bold tracking-tight tabular-nums">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[12px] font-medium text-[#6b7c90] truncate">{label}</p>
+                      <p className="text-[1.05rem] font-bold tracking-tight tabular-nums text-[#0c1b33]">
                         {maskBalance(formatMoney(total, code), hideBalances)}
                       </p>
                     </div>
                     {count > 0 ? (
-                      <span className="text-micro text-slate-500">
+                      <span className="text-[11px] font-medium text-[#8a97a7] shrink-0">
                         {count} acct{count !== 1 ? 's' : ''}
                       </span>
                     ) : (
                       <button
                         type="button"
                         onClick={() => openNewAccount(code)}
-                        className="text-caption text-amber-400 hover:text-amber-300 font-medium"
+                        className="text-[12px] font-semibold text-[#b68a45] hover:text-[#9c7138] shrink-0 transition"
                       >
                         Open →
                       </button>
                     )}
                   </div>
-                </Card>
+                </div>
               );
             })}
           </div>
         </section>
 
-        <section aria-labelledby="accounts-heading">
+        {/* ── Your accounts ── */}
+        <section className="mb-7" aria-labelledby="accounts-heading">
           <SectionHeading
             id="accounts-heading"
-            title="Your Accounts"
+            title="Your accounts"
             icon={Wallet}
             action={
               accounts.length > 0 ? (
-                <span className="text-caption text-slate-500">{accounts.length} total</span>
+                <span className="text-[12px] font-medium text-[#8a97a7]">{accounts.length} total</span>
               ) : undefined
             }
           />
@@ -387,7 +346,7 @@ export default function Dashboard() {
               hint="You can hold all three currencies at the same time."
             />
           ) : (
-            <div className="grid gap-2.5">
+            <div className="space-y-2.5">
               {accounts.map((a) => (
                 <AccountCard key={a.id} account={a} hideBalances={hideBalances} />
               ))}
@@ -395,11 +354,79 @@ export default function Dashboard() {
           )}
         </section>
 
-        <footer className="mt-10 pt-6 border-t border-white/5 text-center">
-          <p className="text-[11px] text-slate-600">© {new Date().getFullYear()} Finance Capital Florida</p>
+        {/* ── Recent activity ── */}
+        {recentTx.length > 0 && (
+          <section className="mb-6" aria-labelledby="activity-heading">
+            <SectionHeading
+              id="activity-heading"
+              title="Recent activity"
+              icon={Clock}
+              action={
+                accounts[0] ? (
+                  <Link
+                    to={`/account/${accounts[0].id}`}
+                    className="text-[12px] font-semibold text-[#b68a45] hover:text-[#9c7138] transition"
+                  >
+                    View all →
+                  </Link>
+                ) : undefined
+              }
+            />
+            <div className="overflow-hidden rounded-2xl border border-[#e6ebf1] bg-white shadow-[0_1px_3px_rgba(12,27,51,0.04)]">
+              {recentTx.map((tx, i) => {
+                const credit = isIncoming(tx);
+                return (
+                  <div
+                    key={tx.id}
+                    className={cx(
+                      'flex items-center justify-between gap-3 px-4 py-3.5',
+                      i !== recentTx.length - 1 && 'border-b border-[#f0f3f7]',
+                    )}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span
+                        className={cx(
+                          'flex h-9 w-9 shrink-0 items-center justify-center rounded-full',
+                          credit ? 'bg-emerald-50 text-emerald-600' : 'bg-[#f0f3f7] text-[#536277]',
+                        )}
+                      >
+                        {credit ? (
+                          <ArrowDownLeft className="h-4 w-4" strokeWidth={2.25} />
+                        ) : (
+                          <ArrowUpRight className="h-4 w-4" strokeWidth={2.25} />
+                        )}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-[#0c1b33] truncate">
+                          {tx.description || titleCase((tx.type || '').replace(/_/g, ' '))}
+                        </p>
+                        <p className="text-[11px] text-[#8a97a7] mt-0.5">{formatRelativeDay(tx.created_at)}</p>
+                      </div>
+                    </div>
+                    <p
+                      className={cx(
+                        'text-sm font-bold tabular-nums shrink-0',
+                        credit ? 'text-emerald-600' : 'text-[#0c1b33]',
+                      )}
+                    >
+                      {credit ? '+' : '−'}
+                      {formatMoney(Math.abs(parseFloat(tx.amount)), tx.currency)}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        <footer className="pt-4 pb-2 text-center">
+          <p className="text-[11px] text-[#a0aab8]">
+            © {new Date().getFullYear()} Finance Capital Florida
+          </p>
         </footer>
       </main>
 
+      {/* ── Bottom nav (structure preserved) ── */}
       <nav aria-label="Primary" className="finance-bottom-nav fixed bottom-0 inset-x-0 z-header">
         <div className="finance-bottom-nav-inner">
           <NavItem icon={Home} label="Home" active />
@@ -423,7 +450,7 @@ export default function Dashboard() {
             </Alert>
           )}
           {availableCurrencies.length === 0 ? (
-            <p className="text-sm text-slate-400">You already have accounts in all available currencies.</p>
+            <p className="text-sm text-slate-500">You already have accounts in all available currencies.</p>
           ) : (
             <>
               <Select label="Currency" value={newCurrency} onChange={(e) => setNewCurrency(e.target.value)}>
@@ -457,7 +484,17 @@ export default function Dashboard() {
   );
 }
 
-function NavItem({ icon: Icon, label, active = false, onClick }: { icon: LucideIcon; label: string; active?: boolean; onClick?: () => void }) {
+function NavItem({
+  icon: Icon,
+  label,
+  active = false,
+  onClick,
+}: {
+  icon: LucideIcon;
+  label: string;
+  active?: boolean;
+  onClick?: () => void;
+}) {
   return (
     <button
       type="button"
@@ -465,24 +502,12 @@ function NavItem({ icon: Icon, label, active = false, onClick }: { icon: LucideI
       className={cx('finance-bottom-nav-item', active && 'is-active')}
       aria-current={active ? 'page' : undefined}
     >
-      <span className="finance-bottom-nav-icon"><Icon className="w-5 h-5" /></span>
+      <span className="finance-bottom-nav-icon">
+        <Icon className="w-5 h-5" />
+      </span>
       <span>{label}</span>
       {active && <span className="finance-bottom-nav-dot" aria-hidden="true" />}
     </button>
-  );
-}
-
-function TopNavItem({ to, label, active = false }: { to: string; label: string; active?: boolean }) {
-  return (
-    <Link
-      to={to}
-      className={cx(
-        'px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-        active ? 'bg-[#f5efe6] text-[#9f712b]' : 'text-[#536277] hover:bg-[#f5f7fa] hover:text-[#10243f]',
-      )}
-    >
-      {label}
-    </Link>
   );
 }
 
@@ -492,30 +517,33 @@ function AccountCard({ account, hideBalances }: { account: Account; hideBalances
     <Link
       to={`/account/${account.id}`}
       className={cx(
-        'group relative flex items-center justify-between gap-4 rounded-2xl border border-white/8',
-        'bg-white/[0.03] px-4 py-4',
-        'transition hover:border-white/15 hover:bg-white/[0.05]',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400',
+        'group flex items-center justify-between gap-4 rounded-2xl border border-[#e6ebf1] bg-white px-4 py-4',
+        'shadow-[0_1px_3px_rgba(12,27,51,0.04)] transition-all duration-150',
+        'hover:border-[#d4b06a]/45 hover:shadow-[0_6px_20px_rgba(12,27,51,0.08)]',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b68a45]/50',
       )}
     >
-      <div className="flex items-center gap-4 min-w-0">
-        <span className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-slate-950 font-bold text-base shrink-0 shadow-lg shadow-amber-500/20">
+      <div className="flex items-center gap-3.5 min-w-0">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#c9a05a] to-[#b68a45] text-[#0c1b33] text-lg font-bold shadow-md shadow-amber-900/10">
           {meta.symbol}
         </span>
         <div className="min-w-0">
-          <p className="font-semibold truncate group-hover:text-amber-300 transition">
+          <p className="font-semibold text-[#0c1b33] truncate group-hover:text-[#7d5730] transition">
             {titleCase(account.account_name || `${account.currency} Account`)}
           </p>
-          <p className="text-caption text-slate-500 font-mono mt-1">{maskAccountNumber(account.account_number)}</p>
+          <p className="mt-0.5 font-mono text-[12px] text-[#8a97a7] tracking-wide">
+            {maskAccountNumber(account.account_number)}
+          </p>
         </div>
       </div>
       <div className="text-right shrink-0">
-        <p className="font-semibold tabular-nums mb-1.5">
+        <p className="font-bold tabular-nums text-[#0c1b33] text-[15px]">
           {maskBalance(formatMoney(account.balance, account.currency), hideBalances)}
         </p>
-        <StatusBadge status={account.status} locked={account.is_locked} />
+        <div className="mt-1.5 flex justify-end">
+          <StatusBadge status={account.status} locked={account.is_locked} />
+        </div>
       </div>
     </Link>
   );
 }
-

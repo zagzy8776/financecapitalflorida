@@ -3,25 +3,26 @@ import { cx } from '../../lib/designTokens';
 
 export type BadgeTone = 'positive' | 'negative' | 'warning' | 'neutral' | 'brand';
 
+/** Tones tuned for light surfaces (institutional banking UI). */
 const TONES: Record<BadgeTone, string> = {
-  positive: 'text-emerald-400 bg-emerald-400/10',
-  negative: 'text-red-400 bg-red-400/10',
-  warning: 'text-brand-400 bg-brand-400/10',
-  neutral: 'text-content-secondary bg-white/5',
-  brand: 'text-brand-300 bg-brand-500/15',
+  positive: 'text-emerald-700 bg-emerald-50 ring-1 ring-emerald-100',
+  negative: 'text-red-700 bg-red-50 ring-1 ring-red-100',
+  warning: 'text-amber-800 bg-amber-50 ring-1 ring-amber-100',
+  neutral: 'text-slate-600 bg-slate-100 ring-1 ring-slate-200/80',
+  brand: 'text-[#7d5730] bg-[#fbf7ef] ring-1 ring-[#e9d7b0]/80',
 };
 
 const DOTS: Record<BadgeTone, string> = {
-  positive: 'bg-emerald-400',
-  negative: 'bg-red-400',
-  warning: 'bg-brand-400',
+  positive: 'bg-emerald-500',
+  negative: 'bg-red-500',
+  warning: 'bg-amber-500',
   neutral: 'bg-slate-400',
-  brand: 'bg-brand-400',
+  brand: 'bg-[#b68a45]',
 };
 
 export interface BadgeProps {
   tone?: BadgeTone;
-  /** Status pills show a colour-coded dot (Req 4.5, 17.6). */
+  /** Status pills show a colour-coded dot. */
   dot?: boolean;
   capitalize?: boolean;
   children: ReactNode;
@@ -32,7 +33,7 @@ export function Badge({ tone = 'neutral', dot = false, capitalize = false, child
   return (
     <span
       className={cx(
-        'inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-caption font-medium',
+        'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold',
         capitalize && 'capitalize',
         TONES[tone],
         className,
