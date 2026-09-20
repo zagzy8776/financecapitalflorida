@@ -156,7 +156,7 @@ export default function Dashboard() {
         )}
       >
         <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="min-h-16 py-3 flex items-center justify-between gap-4">
+          <div className="min-h-16 py-3 flex items-center justify-between gap-4 md:border-b-0">
             <div className="flex items-center min-w-0">
               <Link to="/dashboard" aria-label="Finance Capital Florida home" className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400">
                 <BrandLogo size={32} withWordmark />
@@ -167,6 +167,15 @@ export default function Dashboard() {
                 <TopNavItem to="/transfers" label="Transfers" />
                 <TopNavItem to="/crypto" label="Crypto" />
               </nav>
+            <nav aria-label="Mobile navigation" className="md:hidden w-full absolute left-0 top-full border-t border-[#e8ebef] bg-white">
+              <div className="flex items-center gap-1.5 overflow-x-auto px-4 py-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <MobileNavItem icon={Home} to="/dashboard" label="Overview" active />
+                <MobileNavItem icon={CreditCard} to="/deposits" label="Deposits" />
+                <MobileNavItem icon={ArrowLeftRight} to="/transfers" label="Transfers" />
+                <MobileNavItem icon={Wallet} to="/crypto" label="Crypto" />
+                <MobileNavItem icon={Menu} to="/profile" label="More" />
+              </div>
+            </nav>
             </div>
             <div className="flex items-center gap-1.5 shrink-0">
               <NotificationBell />
@@ -189,7 +198,7 @@ export default function Dashboard() {
 
       <main id="main-content" className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-[calc(6.5rem+env(safe-area-inset-top))] pb-[calc(5.75rem+env(safe-area-inset-bottom))]">
         {/* Photographic balance hero */}
-        <section className="relative mb-6 rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-black/40 min-h-[200px]">
+        <section className="relative mb-6 rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-black/40 min-h-[178px]">
           <div className="absolute inset-0">
             <img src={HERO_IMG} alt="" className="h-full w-full object-cover scale-105" />
             <div className="absolute inset-0 bg-[#070b14]/55" />
@@ -214,7 +223,7 @@ export default function Dashboard() {
               </IconButton>
             </div>
 
-            <p className="text-3xl sm:text-4xl font-bold tracking-tight tabular-nums text-white drop-shadow-sm">
+            <p className="text-[2.5rem] sm:text-4xl font-bold tracking-tight tabular-nums text-white drop-shadow-sm">
               {maskBalance(formatMoney(primaryBalance, primaryCurrency), hideBalances)}
             </p>
 
@@ -236,7 +245,7 @@ export default function Dashboard() {
         </section>
 
         {/* Quick actions */}
-        <div className={`grid ${allCurrenciesTaken ? 'grid-cols-3' : 'grid-cols-4'} gap-2 sm:gap-3 mb-8`}>
+        <div className={`grid ${allCurrenciesTaken ? 'grid-cols-3' : 'grid-cols-4'} gap-2 sm:gap-3 mb-6`}>
           {[
             { icon: Send, label: 'Send', color: 'from-amber-400 to-amber-600', onClick: () => navigate('/transfers') },
             { icon: ArrowDownLeft, label: 'Deposit', color: 'from-emerald-400 to-emerald-600', onClick: () => navigate('/deposits') },
@@ -249,14 +258,14 @@ export default function Dashboard() {
               key={label}
               type="button"
               onClick={onClick}
-              className="flex flex-col items-center gap-2 py-2.5 rounded-xl hover:bg-white/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+              className="flex flex-col items-center gap-2 py-2 rounded-xl hover:bg-white/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
             >
               <span
-                className={`w-12 h-12 rounded-full bg-gradient-to-br ${color} flex items-center justify-center shadow-lg shadow-black/30`}
+                className={`w-11 h-11 rounded-full bg-gradient-to-br ${color} flex items-center justify-center shadow-lg shadow-black/30`}
               >
                 <Icon className="w-5 h-5 text-white" />
               </span>
-              <span className="text-[11px] font-medium text-slate-400">{label}</span>
+              <span className="text-[11px] font-semibold text-slate-400">{label}</span>
             </button>
           ))}
         </div>
@@ -331,19 +340,19 @@ export default function Dashboard() {
 
         <section className="mb-8" aria-labelledby="portfolio-heading">
           <SectionHeading id="portfolio-heading" title="Portfolio" icon={TrendingUp} />
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-2.5 md:grid-cols-2 lg:grid-cols-3">
             {CURRENCIES.map(({ code, label, flag }) => {
               const total = totalByCurrency[code] || 0;
               const count = countByCurrency[code] || 0;
               return (
-                <Card key={code} interactive={count > 0} className="relative group p-4 overflow-hidden border-white/8 bg-white/[0.03]">
+                <Card key={code} interactive={count > 0} className="relative group p-3.5 overflow-hidden border-white/8 bg-white/[0.03]">
                   <div className="flex items-center gap-3">
-                    <span className="w-10 h-10 rounded-xl bg-black/30 border border-white/10 flex items-center justify-center text-lg shrink-0">
+                    <span className="w-9 h-9 rounded-xl bg-black/30 border border-white/10 flex items-center justify-center text-lg shrink-0">
                       {flag}
                     </span>
                     <div className="flex-1 min-w-0">
                       <p className="text-caption text-slate-500">{label}</p>
-                      <p className="text-lg font-bold tracking-tight tabular-nums">
+                      <p className="text-base sm:text-lg font-bold tracking-tight tabular-nums">
                         {maskBalance(formatMoney(total, code), hideBalances)}
                       </p>
                     </div>
@@ -393,7 +402,7 @@ export default function Dashboard() {
               hint="You can hold all three currencies at the same time."
             />
           ) : (
-            <div className="grid gap-3">
+            <div className="grid gap-2.5">
               {accounts.map((a) => (
                 <AccountCard key={a.id} account={a} hideBalances={hideBalances} />
               ))}
@@ -405,21 +414,6 @@ export default function Dashboard() {
           <p className="text-[11px] text-slate-600">© {new Date().getFullYear()} Finance Capital Florida</p>
         </footer>
       </main>
-
-      <nav
-        aria-label="Primary"
-        className="fixed bottom-0 inset-x-0 z-header flex md:hidden bg-white/95 backdrop-blur-xl border-t border-[#e2e7ee] [padding-bottom:env(safe-area-inset-bottom)]"
-      >
-        <div className="max-w-sm mx-auto px-2">
-          <div className="h-16 flex items-center justify-around">
-            <NavItem icon={Home} label="Home" active />
-            <NavItem icon={CreditCard} label="Deposits" onClick={() => navigate('/deposits')} />
-            <NavItem icon={ArrowLeftRight} label="Transfer" onClick={() => navigate('/transfers')} />
-            <NavItem icon={Wallet} label="Crypto" onClick={() => navigate('/crypto')} />
-            <NavItem icon={Menu} label="More" onClick={() => navigate('/profile')} />
-          </div>
-        </div>
-      </nav>
 
       <Modal
         open={showNew}
@@ -465,6 +459,21 @@ export default function Dashboard() {
         </div>
       </Modal>
     </div>
+  );
+}
+
+function MobileNavItem({ icon: Icon, to, label, active = false }: { icon: typeof Home; to: string; label: string; active?: boolean }) {
+  return (
+    <Link
+      to={to}
+      className={cx(
+        'inline-flex items-center gap-1.5 shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold border transition-colors',
+        active ? 'bg-[#f5efe6] border-[#ead9bb] text-[#9f712b]' : 'bg-white border-[#e4e8ee] text-[#536277]',
+      )}
+    >
+      <Icon className="w-3.5 h-3.5" />
+      {label}
+    </Link>
   );
 }
 
