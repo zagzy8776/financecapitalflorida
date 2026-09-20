@@ -21,6 +21,18 @@ async function rawFetch(path: string, options: RequestInit, token: string | null
     const res = await fetch(`${API}${path}`, { ...options, headers, signal: ctrl.signal });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
+      if (res.status === 401 && token) {
+        const userToken = getToken();
+        const adminToken = getAdminToken();
+        if (token === userToken) {
+          localStorage.removeItem('rubicon_token');
+          window.dispatchEvent(new Event('finance-auth-expired'));
+        } else if (token === adminToken) {
+          localStorage.removeItem('rubicon_admin_token');
+          window.dispatchEvent(new Event('finance-admin-auth-expired'));
+        }
+        throw new Error('Your session has expired. Please sign in again.');
+      }
       throw new Error(data.error || `Request failed (${res.status})`);
     }
     return data;
