@@ -36,7 +36,7 @@ export default function ForgotPasswordPage() {
           <BrandLogo />
           <h1 className="mt-4 text-xl font-semibold text-content-primary">Reset your password</h1>
           <p className="mt-1 text-sm text-content-muted">
-            Enter the email on your Rubicon account. If it exists, we will send a secure link.
+            Enter the email on your Finance Capital Florida account. If it exists, we will send a secure reset link.
           </p>
         </div>
         {done ? (
