@@ -242,3 +242,14 @@ body{overflow-x:hidden;}
 .finance-dashboard main{padding-top:calc(6.5rem + env(safe-area-inset-top))!important;}
 .finance-dashboard>header+main{min-height:100vh;}
 @media(min-width:768px){.finance-dashboard main{padding-bottom:3rem!important;}}
+
+
+/* Final dashboard spacing after moving mobile navigation into page chrome */
+.finance-dashboard main{padding-top:5.5rem!important;}
+@media(max-width:767px){
+  .finance-dashboard main{padding-top:8rem!important;padding-bottom:3rem!important;}
+  .finance-dashboard>header{box-shadow:0 1px 0 #e2e7ee!important;}
+  .finance-dashboard main>section:first-of-type{margin-bottom:1.25rem!important;min-height:160px!important;}
+  .finance-dashboard main>section:first-of-type .relative.p-5{padding:1.1rem!important;}
+  .finance-dashboard main>section:first-of-type .text-[2.5rem]{font-size:2.2rem!important;}
+}
