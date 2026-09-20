@@ -85,7 +85,7 @@ export default function TransferPage() {
     let dead = false;
     const t = setTimeout(async () => {
       try {
-        const token = localStorage.getItem('finance_capital_token');
+        const token = localStorage.getItem('rubicon_token');
         const res = await fetch(`/api/transfers/lookup?number=${encodeURIComponent(cleaned)}`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
