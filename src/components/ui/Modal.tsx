@@ -94,7 +94,7 @@ export function Modal({
       onKeyDown={handleKeyDown}
     >
       <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        className="absolute inset-0 bg-[#10243f]/45 backdrop-blur-md"
         aria-hidden="true"
         onClick={closeOnBackdrop ? onClose : undefined}
       />
@@ -108,8 +108,8 @@ export function Modal({
         tabIndex={-1}
         className={cx(
           'relative w-full flex flex-col',
-          'bg-gradient-to-br from-surface-raised to-slate-800/90',
-          'border border-line-strong shadow-modal',
+          'bg-white',
+          'border border-slate-200 shadow-[0_25px_80px_rgba(16,36,63,.18)]',
           'rounded-t-2xl sm:rounded-panel',
           'animate-slide-up focus:outline-none',
           'max-h-[min(92dvh,calc(100vh-2rem))]',
@@ -121,7 +121,7 @@ export function Modal({
             'flex items-start justify-between gap-3',
             'px-5 sm:px-6 pt-5 sm:pt-6 pb-3',
             'border-b border-line-subtle shrink-0',
-            'bg-surface-raised/95 backdrop-blur-sm',
+            'bg-white/95 backdrop-blur-sm',
             'rounded-t-2xl sm:rounded-t-[inherit]',
           )}
         >
