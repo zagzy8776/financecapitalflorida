@@ -408,7 +408,7 @@ export default function Dashboard() {
 
       <nav
         aria-label="Primary"
-        className="fixed bottom-0 inset-x-0 z-header hidden md:hidden bg-white/95 backdrop-blur-xl border-t border-[#e2e7ee] [padding-bottom:env(safe-area-inset-bottom)]"
+        className="fixed bottom-0 inset-x-0 z-header flex md:hidden bg-white/95 backdrop-blur-xl border-t border-[#e2e7ee] [padding-bottom:env(safe-area-inset-bottom)]"
       >
         <div className="max-w-sm mx-auto px-2">
           <div className="h-16 flex items-center justify-around">
