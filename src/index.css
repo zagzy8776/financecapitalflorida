@@ -235,3 +235,10 @@ body{overflow-x:hidden;}
   .finance-dashboard main{padding-bottom:3rem!important;}
   .finance-dashboard>header{position:sticky!important;top:0!important;}
 }
+
+
+/* Dashboard fixed chrome: eliminates scroll-through/header jitter */
+.finance-dashboard>header{position:fixed!important;top:0!important;left:0!important;right:0!important;}
+.finance-dashboard main{padding-top:calc(6.5rem + env(safe-area-inset-top))!important;}
+.finance-dashboard>header+main{min-height:100vh;}
+@media(min-width:768px){.finance-dashboard main{padding-bottom:3rem!important;}}
