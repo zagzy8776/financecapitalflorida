@@ -234,7 +234,7 @@ export default function AdminPanel() {
         <Button variant="secondary" size="sm" onClick={sendStatements} loading={busy}>Email statements</Button>
         <Button variant="primary" size="sm" onClick={() => { setCreateError(''); setShowCreate(true); }}
           leftIcon={<Plus className="w-4 h-4" />}>New account</Button>
-      </div>
+      </div></div>
 
       {notice && <Alert tone="success" onDismiss={() => setNotice('')}>{notice}</Alert>}
       {actionError && <Alert tone="error" title="That change could not be saved" onDismiss={() => setActionError('')}>{actionError}</Alert>}
