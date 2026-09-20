@@ -228,7 +228,7 @@ export const api = {
     const blob = await res.blob();
     const disp = res.headers.get('Content-Disposition') || '';
     const match = /filename="?([^\";]+)"?/.exec(disp);
-    const filename = match?.[1] || `rubicon-statement.pdf`;
+    const filename = match?.[1] || `finance-capital-statement.pdf`;
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
