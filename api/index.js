@@ -1,22 +1,38 @@
 /**
  * Vercel Serverless Function entry point.
- * Do not await migrations before serving — a stuck Aiven pool was taking
- * down every /api request (browser showed Failed to fetch).
+ *
+ * The application uses Aiven PostgreSQL. On a cold start, the schema must be
+ * ready before an auth/account request is allowed to query it. Cache the
+ * migration promise so concurrent requests share the same initialization.
  */
 import app from '../server/src/index.js';
 import { runMigrations } from '../server/src/migrations.js';
 
-let migrationsStarted = false;
+let migrationPromise;
 
-function kickMigrations() {
-  if (migrationsStarted) return;
-  migrationsStarted = true;
-  runMigrations().catch((err) => {
-    console.error('Migration error:', err.message);
-  });
+function ensureMigrations() {
+  if (!migrationPromise) {
+    migrationPromise = runMigrations().catch((err) => {
+      migrationPromise = undefined;
+      console.error('[db] Vercel migration failed:', {
+        code: err?.code,
+        message: err?.message,
+        detail: err?.detail,
+      });
+      throw err;
+    });
+  }
+  return migrationPromise;
 }
 
 export default async function handler(req, res) {
-  kickMigrations();
+  try {
+    await ensureMigrations();
+  } catch (err) {
+    return res.status(503).json({
+      error: 'Database initialization failed. Please try again shortly.',
+    });
+  }
+
   return app(req, res);
 }
