@@ -24,6 +24,10 @@ function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
+/**
+ * Build pg Pool config for Aiven (or any Postgres).
+ * Prefers DATABASE_URL. Forces sslmode=no-verify for Vercel serverless.
+ */
 function buildConfig() {
   let connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL || '';
   if (connectionString) {

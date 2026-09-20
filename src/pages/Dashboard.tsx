@@ -152,7 +152,7 @@ export default function Dashboard() {
       <header
         className={cx(
           'fixed top-0 inset-x-0 z-header backdrop-blur-xl border-b transition-colors duration-200',
-          scrolled ? 'bg-[#070b14]/95 border-white/8 shadow-lg shadow-black/20' : 'bg-[#070b14]/80 border-transparent',
+          scrolled ? 'bg-navy-950/95 border-white/8 shadow-lg shadow-black/20' : 'bg-navy-950/80 border-transparent',
         )}
       >
         <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -186,8 +186,8 @@ export default function Dashboard() {
         <section className="relative mb-6 rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-black/40 min-h-[178px]">
           <div className="absolute inset-0">
             <img src={HERO_IMG} alt="" className="h-full w-full object-cover scale-105" />
-            <div className="absolute inset-0 bg-[#070b14]/55" />
-            <div className="absolute inset-0 bg-gradient-to-br from-[#070b14]/80 via-[#070b14]/50 to-amber-900/20" />
+            <div className="absolute inset-0 bg-navy-950/55" />
+            <div className="absolute inset-0 bg-gradient-to-br from-navy-950/80 via-navy-950/50 to-amber-900/20" />
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_20%,rgba(245,158,11,0.18),transparent_55%)]" />
           </div>
 

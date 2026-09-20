@@ -15,9 +15,9 @@ export interface DesignTokens {
 export const tokens: DesignTokens = {
   colors: {
     brand: '#b68a45', brandSoft: '#d3b06f', positive: '#16805a', negative: '#c44545', warning: '#a36d16', info: '#276c9e',
-    surface: '#f7f8fa', surfaceRaised: '#ffffff', surfaceOverlay: '#eef1f5',
-    contentPrimary: '#10243f', contentSecondary: '#526174', contentMuted: '#7b8796',
-    lineSubtle: '#e3e8ee', lineStrong: '#cbd3dd',
+    surface: '#f6f7f9', surfaceRaised: '#ffffff', surfaceOverlay: '#eef1f5',
+    contentPrimary: '#0c1b33', contentSecondary: '#4a5d73', contentMuted: '#7a8a9c',
+    lineSubtle: '#e6ebf1', lineStrong: '#cfd7e3',
   },
   space: {1:'4px',2:'8px',3:'12px',4:'16px',6:'24px',8:'32px',12:'48px'},
   type: {
