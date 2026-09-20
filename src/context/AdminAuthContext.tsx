@@ -41,7 +41,15 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  useEffect(() => { refresh(); }, []);
+  useEffect(() => {
+    void refresh();
+    const onExpired = () => {
+      setAdmin(null);
+      setLoading(false);
+    };
+    window.addEventListener('finance-admin-auth-expired', onExpired);
+    return () => window.removeEventListener('finance-admin-auth-expired', onExpired);
+  }, []);
 
   const login = async (email: string, password: string) => {
     const res = await fetch(`${API}/admin/login`, {
