@@ -63,10 +63,7 @@ export async function runMigrations() {
       )
     `);
 
-    await query(`
-      CREATE UNIQUE INDEX IF NOT EXISTS idx_profiles_email_unique
-      ON profiles (LOWER(email))
-    `);
+    await index(`CREATE UNIQUE INDEX IF NOT EXISTS idx_profiles_email_unique ON profiles (LOWER(email))`);
 
     await query(`
       CREATE TABLE IF NOT EXISTS accounts (
