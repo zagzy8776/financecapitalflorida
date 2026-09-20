@@ -93,7 +93,7 @@ export default function CryptoPage() {
   const activeAccounts = accounts.filter(a => a.status === 'active');
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="finance-page finance-crypto">
       <PageHeader title="Crypto" subtitle="Digital asset accounts" backTo="/dashboard" />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6 pb-28 space-y-6">
 
