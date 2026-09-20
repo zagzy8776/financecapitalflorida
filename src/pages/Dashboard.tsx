@@ -519,26 +519,3 @@ function AccountCard({ account, hideBalances }: { account: Account; hideBalances
   );
 }
 
-: {
-  icon: typeof Home;
-  label: string;
-  active?: boolean;
-  onClick?: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-current={active ? 'page' : undefined}
-      className={cx(
-        'flex flex-col items-center gap-1 min-w-[64px] py-2 px-2 rounded-xl',
-        'transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400',
-        active ? 'text-amber-400 bg-amber-400/10' : 'text-slate-500 hover:text-slate-200 hover:bg-white/5',
-      )}
-    >
-      <Icon className="w-5 h-5" />
-      <span className="text-[11px] font-medium">{label}</span>
-      <span className={cx('w-1 h-1 rounded-full', active ? 'bg-amber-400' : 'bg-transparent')} />
-    </button>
-  );
-}
