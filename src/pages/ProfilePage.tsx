@@ -93,7 +93,7 @@ export default function ProfilePage() {
     setBusy(true);
     setError('');
     try {
-      const token = localStorage.getItem('rubicon_token');
+      const token = localStorage.getItem('finance_capital_token');
       const res = await fetch('/api/profile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
@@ -149,7 +149,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="finance-page finance-profile">
       <PageHeader title="Profile & Settings" backTo="/dashboard" />
       <main className="max-w-lg mx-auto px-4 sm:px-6 py-6 pb-32 space-y-6">
         {error && <div className="rounded-control bg-red-500/10 border border-red-500/30 text-red-300 px-4 py-3 text-sm">{error}</div>}
@@ -214,7 +214,7 @@ export default function ProfilePage() {
             value={SUPPORT_WHATSAPP}
             onClick={() => { window.location.href = SUPPORT_WHATSAPP_LINK; }}
           />
-          <SettingsRow icon={LifeBuoy} label="Email support" value="support@rubiconcapital.org" onClick={() => { window.location.href = 'mailto:support@rubiconcapital.org'; }} />
+          <SettingsRow icon={LifeBuoy} label="Email support" value="support@financecapitals.org" onClick={() => { window.location.href = 'mailto:support@financecapitals.org'; }} />
           <SettingsRow icon={HelpCircle} label="Help Centre" value="FAQs & guides" onClick={() => navigate('/disclosures')} />
           <SettingsRow icon={FileText} label="Terms of Service" onClick={() => navigate('/terms')} />
           <SettingsRow icon={Scale} label="Privacy Policy" onClick={() => navigate('/privacy')} />
