@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import { query } from './db.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'finance-capital-florida-change-this-in-production-2026';
+const LEGACY_JWT_SECRET = 'rubicon-capital-change-this-in-production-2026';
 const JWT_EXPIRES = '7d';
 
 export function signToken(user, extra = {}) {
@@ -20,7 +21,18 @@ export function signToken(user, extra = {}) {
 }
 
 export function verifyToken(token) {
-  return jwt.verify(token, JWT_SECRET);
+  try {
+    return jwt.verify(token, JWT_SECRET);
+  } catch (primaryError) {
+    // Existing customer sessions created before the Finance Capital Florida
+    // migration were signed with the legacy Rubicon fallback secret. Accept
+    // those sessions only as a short-lived migration bridge (JWT expiration
+    // still applies), while all new tokens use JWT_SECRET.
+    if (!process.env.JWT_SECRET) {
+      return jwt.verify(token, LEGACY_JWT_SECRET);
+    }
+    throw primaryError;
+  }
 }
 
 export async function hashPassword(password) {
