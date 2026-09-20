@@ -56,41 +56,106 @@ app.use(cronRoutes);
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { email, password, full_name, phone, date_of_birth, address, country } = req.body || {};
-    if (!email || !password || !full_name) return res.status(400).json({ error: 'Email, password and full name are required' });
-    if (password.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters' });
-    const existing = await query('SELECT id FROM profiles WHERE email = $1', [email.toLowerCase()]);
-    if (existing.rows.length) return res.status(409).json({ error: 'Email already registered' });
+    if (!email || !password || !full_name) {
+      return res.status(400).json({ error: 'Email, password and full name are required' });
+    }
+    if (password.length < 8) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters' });
+    }
+
+    const normalizedEmail = String(email).trim().toLowerCase();
+    const existing = await query('SELECT id FROM profiles WHERE email = $1', [normalizedEmail]);
+    if (existing.rows.length) {
+      return res.status(409).json({ error: 'Email already registered' });
+    }
+
     const password_hash = await hashPassword(password);
     const OWNER_EMAIL = (process.env.OWNER_EMAIL || '').toLowerCase();
-    const role = email.toLowerCase() === OWNER_EMAIL ? 'admin' : 'user';
+    const role = normalizedEmail === OWNER_EMAIL ? 'admin' : 'user';
     const countryCode = country ? String(country).trim() : 'GB';
-    const { rows } = await query(
-      `INSERT INTO profiles (email, password_hash, full_name, role, phone, date_of_birth, address, country)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-       RETURNING id, email, full_name, role, phone, created_at, country`,
-      [
-        email.toLowerCase(),
-        password_hash,
-        String(full_name).trim(),
-        role,
-        phone ? String(phone).trim() : null,
-        date_of_birth || null,
-        address ? String(address).trim() : null,
-        countryCode,
-      ]
-    );
-    const user = rows[0];
+
+    let user;
+
+    try {
+      const { rows } = await query(
+        `INSERT INTO profiles (email, password_hash, full_name, role, phone, date_of_birth, address, country)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+         RETURNING id, email, full_name, role, phone, created_at, country`,
+        [
+          normalizedEmail,
+          password_hash,
+          String(full_name).trim(),
+          role,
+          phone ? String(phone).trim() : null,
+          date_of_birth || null,
+          address ? String(address).trim() : null,
+          countryCode,
+        ]
+      );
+      user = rows[0];
+    } catch (profileErr) {
+      // Vercel serverless functions do not run runMigrations() at startup.
+      // Keep registration compatible with an older profiles schema, then
+      // backfill optional profile fields when those columns exist.
+      console.error('Registration profile insert with extended fields failed:', {
+        code: profileErr?.code,
+        message: profileErr?.message,
+      });
+
+      const { rows } = await query(
+        `INSERT INTO profiles (email, password_hash, full_name, role)
+         VALUES ($1, $2, $3, $4)
+         RETURNING id, email, full_name, role, created_at`,
+        [normalizedEmail, password_hash, String(full_name).trim(), role]
+      );
+      user = rows[0];
+
+      await query(
+        `UPDATE profiles
+         SET phone = $1, date_of_birth = $2, address = $3, country = $4
+         WHERE id = $5`,
+        [
+          phone ? String(phone).trim() : null,
+          date_of_birth || null,
+          address ? String(address).trim() : null,
+          countryCode,
+          user.id,
+        ]
+      ).catch((fieldErr) => {
+        console.warn('Optional profile fields could not be saved yet:', fieldErr?.message);
+      });
+    }
+
     const token = signToken(user);
-    await query(`INSERT INTO activity_log (user_id, action, description) VALUES ($1, 'register', 'New user registered')`, [user.id]).catch(() => {});
+
+    await query(
+      `INSERT INTO activity_log (user_id, action, description)
+       VALUES ($1, 'register', 'New user registered')`,
+      [user.id]
+    ).catch(() => {});
+
     const account = await ensurePrimaryAccount(user.id, {
       fullName: user.full_name,
       country: countryCode,
     });
+
     voidEmail(emailWelcome({ to: user.email, fullName: user.full_name }));
+
     res.status(201).json({ user, token, account });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Registration failed' });
+    console.error('Registration failed:', {
+      code: err?.code,
+      message: err?.message,
+      detail: err?.detail,
+      constraint: err?.constraint,
+    });
+
+    const status = Number.isInteger(err?.status) ? err.status : 500;
+    const message =
+      status === 503
+        ? 'The database is busy. Please wait a few seconds and try again.'
+        : 'Registration could not be completed. Please try again.';
+    res.status(status).json({ error: message });
   }
 });
 
