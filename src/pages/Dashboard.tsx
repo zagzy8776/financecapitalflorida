@@ -155,12 +155,20 @@ export default function Dashboard() {
           scrolled ? 'bg-[#070b14]/95 border-white/8 shadow-lg shadow-black/20' : 'bg-[#070b14]/80 border-transparent',
         )}
       >
-        <div className="w-full max-w-sm mx-auto px-4 sm:max-w-md md:max-w-2xl lg:max-w-4xl">
-          <div className="h-16 flex items-center justify-between gap-3">
-            <Link to="/dashboard" aria-label="Finance Capital Florida home" className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400">
-              <BrandLogo size={32} withWordmark />
-            </Link>
-            <div className="flex items-center gap-1.5">
+        <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="min-h-16 py-3 flex items-center justify-between gap-4">
+            <div className="flex items-center min-w-0">
+              <Link to="/dashboard" aria-label="Finance Capital Florida home" className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400">
+                <BrandLogo size={32} withWordmark />
+              </Link>
+              <nav aria-label="Desktop navigation" className="hidden md:flex items-center gap-1 ml-8">
+                <TopNavItem to="/dashboard" label="Overview" active />
+                <TopNavItem to="/deposits" label="Deposits" />
+                <TopNavItem to="/transfers" label="Transfers" />
+                <TopNavItem to="/crypto" label="Crypto" />
+              </nav>
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0">
               <NotificationBell />
               <Link
                 to="/profile"
@@ -179,7 +187,7 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <main id="main-content" className="flex-1 w-full max-w-sm mx-auto px-4 pt-5 pb-28 sm:max-w-md md:max-w-2xl lg:max-w-4xl">
+      <main id="main-content" className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-[calc(5.5rem+env(safe-area-inset-bottom))]">
         {/* Photographic balance hero */}
         <section className="relative mb-6 rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-black/40 min-h-[200px]">
           <div className="absolute inset-0">
@@ -400,10 +408,10 @@ export default function Dashboard() {
 
       <nav
         aria-label="Primary"
-        className="fixed bottom-0 inset-x-0 z-header bg-[#070b14]/95 backdrop-blur-xl border-t border-white/8"
+        className="fixed bottom-0 inset-x-0 z-header hidden md:hidden bg-white/95 backdrop-blur-xl border-t border-[#e2e7ee] [padding-bottom:env(safe-area-inset-bottom)]"
       >
-        <div className="max-w-sm mx-auto px-2 sm:max-w-md md:max-w-2xl lg:max-w-4xl">
-          <div className="h-20 flex items-center justify-around">
+        <div className="max-w-sm mx-auto px-2">
+          <div className="h-16 flex items-center justify-around">
             <NavItem icon={Home} label="Home" active />
             <NavItem icon={CreditCard} label="Deposits" onClick={() => navigate('/deposits')} />
             <NavItem icon={ArrowLeftRight} label="Transfer" onClick={() => navigate('/transfers')} />
@@ -457,6 +465,20 @@ export default function Dashboard() {
         </div>
       </Modal>
     </div>
+  );
+}
+
+function TopNavItem({ to, label, active = false }: { to: string; label: string; active?: boolean }) {
+  return (
+    <Link
+      to={to}
+      className={cx(
+        'px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+        active ? 'bg-[#f5efe6] text-[#9f712b]' : 'text-[#536277] hover:bg-[#f5f7fa] hover:text-[#10243f]',
+      )}
+    >
+      {label}
+    </Link>
   );
 }
 
