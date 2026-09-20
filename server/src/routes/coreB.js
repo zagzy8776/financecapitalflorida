@@ -150,15 +150,15 @@ app.post('/api/admin/accounts', authMiddleware, adminMiddleware, async (req, res
       let account;
       try {
         const { rows } = await client.query(
-          `INSERT INTO accounts (user_id, account_number, currency, account_name, account_type, routing_number, balance, status)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, 'active') RETURNING *`,
+          `INSERT INTO accounts (user_id, account_number, currency, account_name, account_type, routing_number, balance, available_balance, status)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $7, 'active') RETURNING *`,
           [user_id, identity.account_number, currency, identity.account_name, identity.account_type, identity.routing_number, deposit]
         );
         account = rows[0];
       } catch (_) {
         const { rows } = await client.query(
-          `INSERT INTO accounts (user_id, account_number, currency, account_name, balance)
-           VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+          `INSERT INTO accounts (user_id, account_number, currency, account_name, balance, available_balance)
+           VALUES ($1, $2, $3, $4, $5, $5) RETURNING *`,
           [user_id, identity.account_number, currency, identity.account_name, deposit]
         );
         account = rows[0];
