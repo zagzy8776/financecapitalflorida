@@ -43,8 +43,8 @@ export async function ensurePrimaryAccount(userId, opts = {}) {
 
   try {
     const { rows } = await query(
-      `INSERT INTO accounts (user_id, account_number, currency, account_name, account_type, routing_number, balance, status)
-       VALUES ($1, $2, $3, $4, $5, $6, 0, 'active') RETURNING *`,
+      `INSERT INTO accounts (user_id, account_number, currency, account_name, account_type, routing_number, balance, available_balance, status)
+       VALUES ($1, $2, $3, $4, $5, $6, 0, 0, 'active') RETURNING *`,
       [userId, identity.account_number, cur, identity.account_name, identity.account_type, identity.routing_number]
     );
     await query(
@@ -56,8 +56,8 @@ export async function ensurePrimaryAccount(userId, opts = {}) {
     console.warn('ensurePrimaryAccount full insert failed, retrying minimal:', err.message);
     try {
       const { rows } = await query(
-        `INSERT INTO accounts (user_id, account_number, currency, account_name, balance)
-         VALUES ($1, $2, $3, $4, 0) RETURNING *`,
+        `INSERT INTO accounts (user_id, account_number, currency, account_name, balance, available_balance)
+         VALUES ($1, $2, $3, $4, 0, 0) RETURNING *`,
         [userId, identity.account_number, cur, identity.account_name]
       );
       return rows[0];
