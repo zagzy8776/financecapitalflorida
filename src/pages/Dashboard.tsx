@@ -161,21 +161,6 @@ export default function Dashboard() {
               <Link to="/dashboard" aria-label="Finance Capital Florida home" className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400">
                 <BrandLogo size={32} withWordmark />
               </Link>
-              <nav aria-label="Desktop navigation" className="hidden md:flex items-center gap-1 ml-8">
-                <TopNavItem to="/dashboard" label="Overview" active />
-                <TopNavItem to="/deposits" label="Deposits" />
-                <TopNavItem to="/transfers" label="Transfers" />
-                <TopNavItem to="/crypto" label="Crypto" />
-              </nav>
-            <nav aria-label="Mobile navigation" className="md:hidden w-full absolute left-0 top-full border-t border-[#e8ebef] bg-white">
-              <div className="flex items-center gap-1.5 overflow-x-auto px-4 py-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                <MobileNavItem icon={Home} to="/dashboard" label="Overview" active />
-                <MobileNavItem icon={CreditCard} to="/deposits" label="Deposits" />
-                <MobileNavItem icon={ArrowLeftRight} to="/transfers" label="Transfers" />
-                <MobileNavItem icon={Wallet} to="/crypto" label="Crypto" />
-                <MobileNavItem icon={Menu} to="/profile" label="More" />
-              </div>
-            </nav>
             </div>
             <div className="flex items-center gap-1.5 shrink-0">
               <NotificationBell />
@@ -415,6 +400,16 @@ export default function Dashboard() {
         </footer>
       </main>
 
+      <nav aria-label="Primary" className="finance-bottom-nav fixed bottom-0 inset-x-0 z-header">
+        <div className="finance-bottom-nav-inner">
+          <NavItem icon={Home} label="Home" active />
+          <NavItem icon={CreditCard} label="Deposits" onClick={() => navigate('/deposits')} />
+          <NavItem icon={ArrowLeftRight} label="Transfer" onClick={() => navigate('/transfers')} />
+          <NavItem icon={Wallet} label="Crypto" onClick={() => navigate('/crypto')} />
+          <NavItem icon={Menu} label="More" onClick={() => navigate('/profile')} />
+        </div>
+      </nav>
+
       <Modal
         open={showNew}
         onClose={() => setShowNew(false)}
@@ -462,18 +457,18 @@ export default function Dashboard() {
   );
 }
 
-function MobileNavItem({ icon: Icon, to, label, active = false }: { icon: LucideIcon; to: string; label: string; active?: boolean }) {
+function NavItem({ icon: Icon, label, active = false, onClick }: { icon: LucideIcon; label: string; active?: boolean; onClick?: () => void }) {
   return (
-    <Link
-      to={to}
-      className={cx(
-        'inline-flex items-center gap-1.5 shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold border transition-colors',
-        active ? 'bg-[#f5efe6] border-[#ead9bb] text-[#9f712b]' : 'bg-white border-[#e4e8ee] text-[#536277]',
-      )}
+    <button
+      type="button"
+      onClick={onClick}
+      className={cx('finance-bottom-nav-item', active && 'is-active')}
+      aria-current={active ? 'page' : undefined}
     >
-      <Icon className="w-3.5 h-3.5" />
-      {label}
-    </Link>
+      <span className="finance-bottom-nav-icon"><Icon className="w-5 h-5" /></span>
+      <span>{label}</span>
+      {active && <span className="finance-bottom-nav-dot" aria-hidden="true" />}
+    </button>
   );
 }
 
