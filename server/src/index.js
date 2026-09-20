@@ -197,7 +197,7 @@ const coreDeps = {
 mountCoreA(app, coreDeps);
 mountCoreB(app, coreDeps);
 
-app.get('/api/health', (req, res) => res.json({ status: 'ok', bank: 'Rubicon Capital' }));
+app.get('/api/health', (req, res) => res.json({ status: 'ok', bank: 'Finance Capital Florida', database: 'postgresql' }));
 
 function authorizeCron(req, res, next) {
   const secret = process.env.CRON_SECRET || '';
