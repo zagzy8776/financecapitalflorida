@@ -210,6 +210,7 @@ export async function runMigrations() {
     await query(`UPDATE profiles SET account_status = 'active' WHERE account_status IS NULL`);
     await query(`UPDATE profiles SET session_version = 1 WHERE session_version IS NULL`);
     await query(`UPDATE accounts SET balance = 0 WHERE balance IS NULL`);
+    // Existing deployments created accounts before available_balance existed.\n    // In this application available_balance represents the spendable ledger amount,\n    // so bring it into sync once during migration.\n    await query(`UPDATE accounts SET available_balance = balance WHERE available_balance IS NULL OR available_balance = 0`);
     await query(`UPDATE accounts SET available_balance = COALESCE(balance, 0) WHERE available_balance IS NULL`);
     await query(`UPDATE accounts SET account_type = 'current' WHERE account_type IS NULL OR account_type = ''`);
     await query(`UPDATE accounts SET status = 'active' WHERE status IS NULL OR status = ''`);
