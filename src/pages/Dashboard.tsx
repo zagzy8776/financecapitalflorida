@@ -13,7 +13,7 @@ import { BrandLogo } from '../components/BrandLogo';
 import { cx } from '../lib/designTokens';
 import {
   ArrowDownLeft, ArrowLeftRight, ArrowUpRight, Clock, CreditCard, Eye, EyeOff,
-  Home, Menu, Plus, Send, Wallet, TrendingUp, Coins,
+  Home, Menu, Plus, Send, Wallet, TrendingUp, Coins, type LucideIcon,
 } from 'lucide-react';
 import { NotificationBell } from '../components/NotificationBell';
 
@@ -462,7 +462,7 @@ export default function Dashboard() {
   );
 }
 
-function MobileNavItem({ icon: Icon, to, label, active = false }: { icon: typeof Home; to: string; label: string; active?: boolean }) {
+function MobileNavItem({ icon: Icon, to, label, active = false }: { icon: LucideIcon; to: string; label: string; active?: boolean }) {
   return (
     <Link
       to={to}
