@@ -229,7 +229,7 @@ export default function AdminPanel() {
 
   return (
     <AdminLayout activeTab={tab} onTabChange={selectTab}>
-      <div className="flex flex-wrap items-center justify-end gap-2 mb-6">
+      <div className="admin-page-intro flex flex-wrap items-center justify-between gap-4 mb-7"><div><p className="text-xs uppercase tracking-[.16em] text-[#b68a45] font-semibold">Control center</p><h2 className="mt-1 text-2xl font-semibold text-[#10243f]">Manage Finance Capital Florida</h2><p className="text-sm text-slate-500 mt-1">Customers, accounts, ledger activity and approvals in one workspace.</p></div><div className="flex flex-wrap gap-2">
         <Button variant="secondary" size="sm" onClick={sendDigest} loading={busy}>Email digest</Button>
         <Button variant="secondary" size="sm" onClick={sendStatements} loading={busy}>Email statements</Button>
         <Button variant="primary" size="sm" onClick={() => { setCreateError(''); setShowCreate(true); }}
@@ -373,7 +373,7 @@ export default function AdminPanel() {
 
 function StatCard({ label, value, icon: Icon, alert }: { label: string; value: number; icon: any; alert?: boolean }) {
   return (
-    <Card className="p-4">
+    <Card className="admin-panel-card p-5">
       <div className="flex items-center justify-between mb-2">
         <span className="text-caption text-content-muted">{label}</span>
         <Icon className={cx('w-4 h-4', alert ? 'text-red-400' : 'text-content-muted')} />
