@@ -519,12 +519,7 @@ function AccountCard({ account, hideBalances }: { account: Account; hideBalances
   );
 }
 
-function NavItem({
-  icon: Icon,
-  label,
-  active,
-  onClick,
-}: {
+: {
   icon: typeof Home;
   label: string;
   active?: boolean;
