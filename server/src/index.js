@@ -262,10 +262,12 @@ app.get('/api/cron/health', authorizeCron, (req, res) => {
 export default app;
 
 if (!process.env.VERCEL) {
+  // Render/Railway/Fly/local persistent API services run the full idempotent
+  // schema migration before accepting traffic.
   runMigrations().then(() => {
-    app.listen(PORT, () => console.log(`Rubicon Capital API on http://localhost:${PORT}`));
+    app.listen(PORT, () => console.log(`Finance Capital Florida API on http://localhost:${PORT}`));
   }).catch(err => {
-    console.error('Migration failed:', err);
+    console.error('[db] Migration failed:', err);
     process.exit(1);
   });
 }
