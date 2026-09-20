@@ -31,7 +31,7 @@ export async function runMigrations() {
 
   try {
     await query('CREATE EXTENSION IF NOT EXISTS pgcrypto');
-    await query(\`CREATE TABLE IF NOT EXISTS schema_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL, applied_at TIMESTAMPTZ NOT NULL DEFAULT now())\`);
+    await query(`CREATE TABLE IF NOT EXISTS schema_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL, applied_at TIMESTAMPTZ NOT NULL DEFAULT now())`);
 
     // -----------------------------------------------------------------------
     // Core identity tables. These make a brand-new Render/Postgres database
