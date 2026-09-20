@@ -1,19 +1,19 @@
-# Rubicon Capital
+# Finance Capital Florida
 
-Professional multi-currency private banking platform (GBP / USD / EUR).
+Finance Capital Florida is a standalone financial services web application with its own brand, visual identity, and customer/admin experience. It is a separate project from the Rubicon Capital application.
 
 ## Stack
 
 - **Frontend**: React + TypeScript + Vite + Tailwind
 - **Backend**: Node.js + Express + JWT
-- **Database**: Aiven PostgreSQL
+- **Database**: PostgreSQL
 
 ## Features
 
-- Multi-currency accounts (GBP, USD, EUR)
-- Customer dashboard with balances, deposits, withdrawals, transfers
+- Multi-currency accounts (GBP / USD / EUR)
+- Customer dashboard with balances, deposits, withdrawals, and transfers
 - Full Admin Control Centre:
-  - Overview & assets by currency
+  - Overview and assets by currency
   - User management (lock/unlock)
   - Account management (lock/unlock, create accounts)
   - Transaction monitoring
@@ -24,7 +24,7 @@ Professional multi-currency private banking platform (GBP / USD / EUR).
 
 ## Setup
 
-1. Copy `.env.example` → `.env` and fill in your Aiven credentials + JWT_SECRET
+1. Copy `.env.example` to `.env` and fill in your database credentials and `JWT_SECRET`.
 2. Install dependencies:
 
 ```bash
@@ -42,11 +42,17 @@ cd server && npm run dev
 npm run dev
 ```
 
+Or run both together:
+
+```bash
+npm run dev:all
+```
+
 Open http://localhost:5173
 
 ## First Admin
 
-1. Sign up normally through the UI
+1. Sign up normally through the UI.
 2. Call the promote endpoint (or run SQL):
 
 ```bash
@@ -63,7 +69,11 @@ UPDATE profiles SET role = 'admin' WHERE email = 'your@email.com';
 
 ## Security Notes
 
-- Never commit `.env`
-- Change `JWT_SECRET` in production
-- All money movements use database transactions
-- Locked accounts cannot transact
+- Never commit `.env`.
+- Change `JWT_SECRET` in production.
+- All money movements use database transactions.
+- Locked accounts cannot transact.
+
+## Project Separation
+
+**Finance Capital Florida and Rubicon Capital are separate applications.** Rubicon Capital is maintained in its own repository and should not be treated as the brand, name, or design identity of this project. Finance Capital Florida uses its own branding and design system while retaining the required application functionality.
