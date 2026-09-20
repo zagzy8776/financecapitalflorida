@@ -51,7 +51,7 @@ export default function AdminLoginPage() {
           </div>
           <h1 className="text-xl font-semibold tracking-tight">Admin console</h1>
           <p className="text-sm text-slate-400 mt-1.5">
-            Rubicon Capital · restricted access
+            Finance Capital Florida · restricted access
           </p>
         </div>
 
