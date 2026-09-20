@@ -72,7 +72,7 @@ export default function DepositPage() {
   const selectedAccount = accounts.find(a => a.id === accountId);
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="finance-page finance-deposit">
       <PageHeader title="Deposits" subtitle="Request funds to your account" backTo="/dashboard" />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6 pb-28 space-y-6">
 
