@@ -1,5 +1,5 @@
 /**
- * Rubicon Capital — transactional email via Resend.
+ * Finance Capital Florida — transactional email via Resend.
  * Requires env: RESEND_API_KEY, optional EMAIL_FROM, APP_URL
  */
 
@@ -8,14 +8,14 @@ import { query } from './db.js';
 const RESEND_API = 'https://api.resend.com/emails';
 const FROM =
   process.env.EMAIL_FROM ||
-  'Rubicon Capital <noreply@rubiconcapital.org>';
+  'Finance Capital Florida <noreply@financecapitals.org>';
 const APP_URL =
   process.env.APP_URL ||
   process.env.VITE_APP_URL ||
-  'https://www.rubiconcapital.org';
+  'https://www.financecapitals.org';
 const SUPPORT =
   process.env.SUPPORT_EMAIL ||
-  'support@rubiconcapital.org';
+  'support@financecapitals.org';
 
 export function money(amount, currency = 'USD') {
   const n = Number(amount);
@@ -34,8 +34,8 @@ export function money(amount, currency = 'USD') {
 export function escapeHtml(s) {
   return String(s ?? '')
     .replace(/&/g, '&')
-    .replace(/</g, '<')
-    .replace(/>/g, '>')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
     .replace(/"/g, '"');
 }
 
@@ -64,7 +64,7 @@ export function layout({ title, preheader, bodyHtml }) {
             <table role="presentation" width="100%"><tr>
               <td style="font-size:18px;font-weight:700;color:#f8fafc;">
                 <span style="display:inline-block;width:28px;height:28px;line-height:28px;text-align:center;border-radius:8px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#0b1220;font-size:14px;font-weight:800;margin-right:10px;">R</span>
-                Rubicon Capital
+                Finance Capital Florida
               </td>
               <td align="right" style="font-size:11px;color:#64748b;letter-spacing:0.08em;text-transform:uppercase;">Secure notice</td>
             </tr></table>
@@ -78,7 +78,7 @@ export function layout({ title, preheader, bodyHtml }) {
         </tr>
         <tr>
           <td style="padding:20px 28px;background:#0b1220;border-top:1px solid #1e293b;font-size:12px;color:#64748b;line-height:1.5;">
-            This message was sent by Rubicon Capital regarding your account.
+            This message was sent by Finance Capital Florida regarding your account.
             If you did not expect it, contact <a href="mailto:${SUPPORT}" style="color:#f59e0b;text-decoration:none;">${SUPPORT}</a>.
             <br/><br/>
             <a href="${APP_URL}" style="color:#94a3b8;text-decoration:none;">${APP_URL.replace(/^https?:\/\//, '')}</a>
@@ -142,11 +142,11 @@ export async function getUserContact(userId) {
 export async function emailWelcome({ to, fullName }) {
   const first = (fullName || 'Client').split(/\s+/)[0];
   const html = layout({
-    title: 'Welcome to Rubicon Capital',
+    title: 'Welcome to Finance Capital Florida',
     preheader: 'Your account is ready. Sign in securely anytime.',
     bodyHtml: `
       <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#cbd5e1;">
-        Hello ${escapeHtml(first)}, thank you for opening a relationship with Rubicon Capital.
+        Hello ${escapeHtml(first)}, thank you for opening a relationship with Finance Capital Florida.
       </p>
       <p style="margin:0 0 20px;font-size:15px;line-height:1.6;color:#cbd5e1;">
         You can sign in, request deposits, and manage multi-currency accounts from your secure dashboard.
@@ -155,14 +155,14 @@ export async function emailWelcome({ to, fullName }) {
         Sign in to your account
       </a>`,
   });
-  return sendEmail({ to, subject: 'Welcome to Rubicon Capital', html, text: `Welcome ${first}. Sign in at ${APP_URL}/login` });
+  return sendEmail({ to, subject: 'Welcome to Finance Capital Florida', html, text: `Welcome ${first}. Sign in at ${APP_URL}/login` });
 }
 
 export async function emailLoginAlert({ to, fullName, when, ip }) {
   const first = (fullName || 'Client').split(/\s+/)[0];
   const html = layout({
     title: 'New sign-in to your account',
-    preheader: 'A sign-in was recorded on your Rubicon Capital account.',
+    preheader: 'A sign-in was recorded on your Finance Capital Florida account.',
     bodyHtml: `
       <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#cbd5e1;">Hello ${escapeHtml(first)}, we recorded a successful sign-in.</p>
       <table role="presentation" width="100%" style="margin:8px 0 16px;">
@@ -171,7 +171,7 @@ export async function emailLoginAlert({ to, fullName, when, ip }) {
       </table>
       <p style="margin:0;font-size:13px;color:#64748b;">If this was not you, change your password and contact ${escapeHtml(SUPPORT)} immediately.</p>`,
   });
-  return sendEmail({ to, subject: 'Rubicon Capital — new sign-in', html });
+  return sendEmail({ to, subject: 'Finance Capital Florida — new sign-in', html });
 }
 
 export async function emailTransferSent({ to, fullName, amount, currency, toAccount, reference, when }) {
@@ -265,24 +265,24 @@ export async function emailPasswordReset({ to, fullName, resetUrl, expiresMinute
     title: 'Reset your password',
     preheader: 'Use this secure link to set a new password.',
     bodyHtml: `
-      <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#cbd5e1;">Hello ${escapeHtml(first)}, we received a request to reset the password for your Rubicon Capital account.</p>
+      <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#cbd5e1;">Hello ${escapeHtml(first)}, we received a request to reset the password for your Finance Capital Florida account.</p>
       <a href="${resetUrl}" style="display:inline-block;padding:12px 22px;background:#f59e0b;color:#0b1220;font-weight:600;font-size:14px;border-radius:10px;text-decoration:none;">Reset password</a>
       <p style="margin:20px 0 0;font-size:13px;color:#64748b;">This link expires in ${expiresMinutes} minutes. If you did not request a reset, ignore this email.</p>`,
   });
-  return sendEmail({ to, subject: 'Rubicon Capital — reset your password', html, text: `Reset: ${resetUrl}` });
+  return sendEmail({ to, subject: 'Finance Capital Florida — reset your password', html, text: `Reset: ${resetUrl}` });
 }
 
 export async function emailPasswordChanged({ to, fullName, when }) {
   const first = (fullName || 'Client').split(/\s+/)[0];
   const html = layout({
     title: 'Password changed',
-    preheader: 'Your Rubicon Capital password was updated.',
+    preheader: 'Your Finance Capital Florida password was updated.',
     bodyHtml: `
       <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#cbd5e1;">Hello ${escapeHtml(first)}, the password for your account was changed successfully.</p>
       <table role="presentation" width="100%">${row('When', escapeHtml(when || new Date().toUTCString()))}</table>
       <p style="margin:20px 0 0;font-size:13px;color:#64748b;">If this was not you, contact ${escapeHtml(SUPPORT)} immediately.</p>`,
   });
-  return sendEmail({ to, subject: 'Rubicon Capital — password changed', html });
+  return sendEmail({ to, subject: 'Finance Capital Florida — password changed', html });
 }
 
 export async function emailAccountLock({ to, fullName, locked, reason, scope = 'account' }) {
@@ -301,7 +301,7 @@ export async function emailAccountLock({ to, fullName, locked, reason, scope = '
         ${row('Date', escapeHtml(new Date().toUTCString()))}
       </table>`,
   });
-  return sendEmail({ to, subject: `Rubicon Capital — ${title.toLowerCase()}`, html });
+  return sendEmail({ to, subject: `Finance Capital Florida — ${title.toLowerCase()}`, html });
 }
 
 export async function emailTransferFailed({ to, fullName, amount, currency, toAccount, reason }) {
@@ -318,7 +318,7 @@ export async function emailTransferFailed({ to, fullName, amount, currency, toAc
         ${row('Date', escapeHtml(new Date().toUTCString()))}
       </table>`,
   });
-  return sendEmail({ to, subject: 'Rubicon Capital — transfer failed', html });
+  return sendEmail({ to, subject: 'Finance Capital Florida — transfer failed', html });
 }
 
 export async function emailMonthlyStatement({ to, fullName, periodLabel, accounts = [], txSummary = {} }) {
@@ -328,7 +328,7 @@ export async function emailMonthlyStatement({ to, fullName, periodLabel, account
   ).join('');
   const html = layout({
     title: `Statement · ${periodLabel}`,
-    preheader: `Your Rubicon Capital summary for ${periodLabel}.`,
+    preheader: `Your Finance Capital Florida summary for ${periodLabel}.`,
     bodyHtml: `
       <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#cbd5e1;">Hello ${escapeHtml(first)}, here is your account summary for <strong style="color:#f8fafc;">${escapeHtml(periodLabel)}</strong>.</p>
       <table role="presentation" width="100%" style="margin-bottom:16px;">${accountRows || row('Accounts', 'No open accounts')}</table>
@@ -338,7 +338,7 @@ export async function emailMonthlyStatement({ to, fullName, periodLabel, account
         ${row('Transfers', escapeHtml(String(txSummary.transfers ?? '—')))}
       </table>`,
   });
-  return sendEmail({ to, subject: `Rubicon Capital statement · ${periodLabel}`, html });
+  return sendEmail({ to, subject: `Finance Capital Florida statement · ${periodLabel}`, html });
 }
 
 export async function emailAdminDigest({ to, pendingDeposits = [], pendingRequests = 0, lockedAccounts = 0, when }) {
@@ -374,11 +374,11 @@ export async function emailLoginOtp({ to, fullName, code, expiresMinutes = 10 })
   const safeCode = escapeHtml(String(code));
   const html = layout({
     title: 'Your sign-in code',
-    preheader: `Your Rubicon Capital sign-in code is ${code}`,
+    preheader: `Your Finance Capital Florida sign-in code is ${code}`,
     bodyHtml: `
       <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#cbd5e1;">Hello ${safeName},</p>
       <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#cbd5e1;">
-        Use this one-time code to finish signing in to Rubicon Capital. It expires in ${expiresMinutes} minutes.
+        Use this one-time code to finish signing in to Finance Capital Florida. It expires in ${expiresMinutes} minutes.
       </p>
       <p style="margin:24px 0;text-align:center;font-size:32px;letter-spacing:0.35em;font-weight:700;color:#f8fafc;font-family:ui-monospace,monospace;">
         ${safeCode}
@@ -390,9 +390,9 @@ export async function emailLoginOtp({ to, fullName, code, expiresMinutes = 10 })
   });
   return sendEmail({
     to,
-    subject: `Your Rubicon sign-in code: ${code}`,
+    subject: `Your Finance Capital Florida sign-in code: ${code}`,
     html,
-    text: `Your Rubicon Capital sign-in code is ${code}. It expires in ${expiresMinutes} minutes.`,
+    text: `Your Finance Capital Florida sign-in code is ${code}. It expires in ${expiresMinutes} minutes.`,
   });
 }
 
