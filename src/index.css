@@ -141,3 +141,14 @@ select:-webkit-autofill {
 .finance-admin .admin-content{background:#f3f6f9;}
 .finance-admin .admin-panel-card{background:#fff;border:1px solid #e1e6ed;border-radius:20px;box-shadow:0 10px 30px rgba(16,36,63,.045);}
 @media(max-width:767px){.finance-page main{padding-left:18px!important;padding-right:18px!important;}.finance-page .finance-header{position:relative!important;}.finance-admin aside{width:280px!important;}}
+
+.finance-admin .rounded-card{border-radius:18px!important;border-color:#e1e6ed!important;background:#fff!important;box-shadow:0 7px 22px rgba(16,36,63,.035)!important;}
+.finance-admin .bg-surface-raised\/40,.finance-admin .bg-surface-raised\/30,.finance-admin .bg-surface-raised\/60{background:#fff!important;}
+.finance-admin .text-content-primary{color:#10243f!important;}
+.finance-admin .text-content-secondary{color:#405069!important;}
+.finance-admin .text-content-muted{color:#748196!important;}
+.finance-admin .border-line-subtle{border-color:#e1e6ed!important;}
+.finance-admin .admin-page-intro{padding:4px 0 2px;}
+.finance-admin .admin-page-intro+div{border-radius:16px;}
+.finance-admin .bg-brand-400\/10{background:rgba(182,138,69,.10)!important;}
+.finance-admin .text-brand-300,.finance-admin .text-brand-400{color:#a9782e!important;}
