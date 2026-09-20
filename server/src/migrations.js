@@ -31,6 +31,7 @@ export async function runMigrations() {
 
   try {
     await query('CREATE EXTENSION IF NOT EXISTS pgcrypto');
+    await query(\`CREATE TABLE IF NOT EXISTS schema_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL, applied_at TIMESTAMPTZ NOT NULL DEFAULT now())\`);
 
     // -----------------------------------------------------------------------
     // Core identity tables. These make a brand-new Render/Postgres database
@@ -400,6 +401,8 @@ export async function runMigrations() {
     await query(`UPDATE accounts SET routing_number = '04-00-26' WHERE currency = 'GBP' AND COALESCE(routing_number, '') = ''`);
     await query(`UPDATE accounts SET routing_number = '026009593' WHERE currency = 'USD' AND COALESCE(routing_number, '') = ''`);
     await query(`UPDATE accounts SET routing_number = '20041000' WHERE currency = 'EUR' AND COALESCE(routing_number, '') = ''`);
+
+    await query(`INSERT INTO schema_migrations (version, name) VALUES (1, 'finance-capital-florida-baseline') ON CONFLICT (version) DO UPDATE SET name = EXCLUDED.name`);
 
     console.log('[db] Finance Capital Florida migrations complete');
   } finally {
