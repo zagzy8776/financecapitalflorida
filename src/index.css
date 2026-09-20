@@ -218,3 +218,20 @@ select:-webkit-autofill {
 .finance-admin td{border-color:#edf0f4!important;}
 .finance-admin input,.finance-admin select,.finance-admin textarea{border-color:#dfe5ec!important;background:#fff!important;color:#10243f!important;border-radius:12px!important;}
 .finance-admin input:focus,.finance-admin select:focus,.finance-admin textarea:focus{border-color:#b68a45!important;box-shadow:0 0 0 3px rgba(182,138,69,.12)!important;outline:none!important;}
+
+
+/* Scroll + viewport polish */
+html{scroll-padding-top:88px;scroll-padding-bottom:90px;}
+body{overflow-x:hidden;}
+.finance-dashboard{overflow-x:clip;}
+.finance-dashboard main{scroll-margin-top:88px;}
+.finance-dashboard>header{isolation:isolate;}
+.finance-dashboard>nav{padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -8px 24px rgba(16,36,63,.05);}
+@media(max-width:767px){
+  .finance-dashboard main{padding-bottom:calc(5.75rem + env(safe-area-inset-bottom))!important;}
+  .finance-dashboard>header{position:sticky!important;top:0!important;}
+}
+@media(min-width:768px){
+  .finance-dashboard main{padding-bottom:3rem!important;}
+  .finance-dashboard>header{position:sticky!important;top:0!important;}
+}
