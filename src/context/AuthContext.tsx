@@ -64,7 +64,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    refresh();
+    void refresh();
+    const onExpired = () => {
+      setUser(null);
+      setLoading(false);
+    };
+    window.addEventListener('finance-auth-expired', onExpired);
+    return () => window.removeEventListener('finance-auth-expired', onExpired);
   }, []);
 
   const login = async (email: string, password: string, opts?: { trust_device?: boolean }): Promise<OtpChallenge | null> => {
