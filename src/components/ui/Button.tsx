@@ -13,9 +13,9 @@ const VARIANTS: Record<ButtonVariant, string> = {
   primary:
     'bg-gradient-to-r from-brand-500 to-brand-600 text-surface font-semibold hover:from-brand-400 hover:to-brand-500 shadow-amber hover:shadow-amber-strong',
   secondary:
-    'border border-line-strong bg-surface-overlay/40 text-content-primary font-medium hover:border-slate-500 hover:bg-surface-overlay/70',
+    'border border-[#dfe5ec] bg-white text-[#0c1b33] font-medium hover:border-[#b68a45]/50 hover:bg-[#f8f9fb] shadow-sm',
   tertiary:
-    'text-content-secondary font-medium hover:text-content-primary hover:bg-white/5',
+    'text-[#4a5d73] font-medium hover:text-[#0c1b33] hover:bg-[#f0f3f7]',
   danger:
     'bg-red-600/90 text-white font-semibold hover:bg-red-500 shadow-card',
   success:
