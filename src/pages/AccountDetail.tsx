@@ -392,9 +392,6 @@ export default function AccountDetail() {
               </div>
             </div>
           </div>
-          <p className="mt-4 text-caption text-content-muted">
-            Bank: Finance Capital Florida · Use these details for same-currency transfers on the platform.
-          </p>
         </Card>
 
         <section className="mt-10" aria-labelledby="activity-heading">
