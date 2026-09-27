@@ -364,7 +364,7 @@ export async function emailAdminDigest({ to, pendingDeposits = [], pendingReques
   });
   return sendEmail({
     to,
-    subject: `Rubicon admin digest · ${(pendingDeposits || []).length} pending deposit(s)`,
+    subject: `Finance Capital Florida admin digest · ${(pendingDeposits || []).length} pending deposit(s)`,
     html,
   });
 }

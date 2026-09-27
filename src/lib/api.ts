@@ -1,11 +1,18 @@
+import {
+  getStoredToken,
+  getStoredAdminToken,
+  clearStoredToken,
+  clearStoredAdminToken,
+} from './storageKeys';
+
 const API = '/api';
 
 function getToken() {
-  return localStorage.getItem('rubicon_token');
+  return getStoredToken();
 }
 
 function getAdminToken() {
-  return localStorage.getItem('rubicon_admin_token');
+  return getStoredAdminToken();
 }
 
 async function rawFetch(path: string, options: RequestInit, token: string | null) {
@@ -25,10 +32,10 @@ async function rawFetch(path: string, options: RequestInit, token: string | null
         const userToken = getToken();
         const adminToken = getAdminToken();
         if (token === userToken) {
-          localStorage.removeItem('rubicon_token');
+          clearStoredToken();
           window.dispatchEvent(new Event('finance-auth-expired'));
         } else if (token === adminToken) {
-          localStorage.removeItem('rubicon_admin_token');
+          clearStoredAdminToken();
           window.dispatchEvent(new Event('finance-admin-auth-expired'));
         }
         throw new Error('Your session has expired. Please sign in again.');

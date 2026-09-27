@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
+import { getStoredToken } from '../lib/storageKeys';
 import { useAuth } from '../context/AuthContext';
 import { formatShortDate } from '../lib/format';
 import { Badge, Button, Card, Input, Modal, PageHeader, StatusBadge } from '../components/ui';
@@ -11,8 +12,8 @@ import {
   User, FileText, Scale, Info,
 } from 'lucide-react';
 
-const SUPPORT_WHATSAPP = '+447448216273';
-const SUPPORT_WHATSAPP_LINK = 'https://wa.me/447448216273';
+const SUPPORT_WHATSAPP = '+19412831579';
+const SUPPORT_WHATSAPP_LINK = 'https://wa.me/19412831579';
 
 function getInitials(name?: string) {
   if (!name) return '?';
@@ -58,7 +59,7 @@ export default function ProfilePage() {
     [user],
   );
 
-  const avatarUrl = (user as any)?.avatar_url as string | undefined;
+  const avatarUrl = user?.avatar_url;
 
   useEffect(() => {
     refresh().catch(() => {});
@@ -93,7 +94,7 @@ export default function ProfilePage() {
     setBusy(true);
     setError('');
     try {
-      const token = localStorage.getItem('rubicon_token');
+      const token = getStoredToken();
       const res = await fetch('/api/profile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
@@ -191,7 +192,7 @@ export default function ProfilePage() {
           <SettingsRow icon={KeyRound} label="Change Password" value="Update password" onClick={() => { setError(''); setShowPasswordModal(true); }} />
           <SettingsRow icon={Lock} label="Transaction PIN" value={hasPin ? 'Set · required for transfers' : 'Not set'} onClick={() => { setError(''); setShowPinModal(true); }} />
           <SettingsRow icon={ShieldCheck} label="Two-Factor Authentication" value="Email code required at every sign-in" />
-          <SettingsRow icon={Smartphone} label="Active Sessions" value="Manage devices" onClick={() => navigate('/dashboard')} />
+          <SettingsRow icon={Smartphone} label="Active Sessions" value="Managed on next sign-in" />
           <SettingsRow
             icon={Bell}
             label="Login Alerts"

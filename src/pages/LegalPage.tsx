@@ -11,11 +11,11 @@ const TITLES: Record<Doc, string> = {
 
 const BODY: Record<Doc, string[]> = {
   terms: [
-    'Rubicon Capital provides a multi-currency banking simulation and demonstration platform. Access is subject to these Terms of Use.',
+    'Finance Capital Florida provides a multi-currency banking simulation and demonstration platform. Access is subject to these Terms of Use.',
     'You must provide accurate registration details and keep your credentials confidential. You are responsible for activity under your account.',
     'The platform may include simulated balances, transfers, deposits, and crypto accounts for product demonstration. Simulated ledger entries are not claims on real funds unless expressly stated in a separate written agreement.',
     'We may suspend or terminate access for suspected misuse, fraud, or breach of these terms. Admin actions (including balance adjustments) are logged for audit.',
-    'To the fullest extent permitted by law, Rubicon Capital is not liable for indirect or consequential losses arising from use of the demo environment.',
+    'To the fullest extent permitted by law, Finance Capital Florida is not liable for indirect or consequential losses arising from use of the demo environment.',
     'These terms may be updated from time to time. Continued use after changes constitutes acceptance of the revised terms.',
   ],
   privacy: [
@@ -31,7 +31,7 @@ const BODY: Record<Doc, string[]> = {
     'Deposit requests require administrative review before funds appear as available balance. Transfers between same-currency accounts on the platform may credit instantly when both sides exist in the ledger.',
     'Crypto balances are simulated until real custody or exchange integrations are enabled. Do not send real digital assets to addresses displayed in this demo.',
     'Nothing on this site constitutes investment, tax, or legal advice. Past or simulated performance is not a guarantee of future results.',
-    'For support contact support@rubiconcapital.org or the channels published on the site.',
+    'For support contact support@financecapitals.org or the channels published on the site.',
   ],
 };
 
@@ -73,7 +73,7 @@ export default function LegalPage() {
           ))}
         </div>
         <p className="mt-10 text-caption text-content-muted">
-          Last updated: September 2026 · Rubicon Capital
+          Last updated: September 2026 · Finance Capital Florida
         </p>
       </main>
     </div>

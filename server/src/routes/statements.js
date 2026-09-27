@@ -87,7 +87,7 @@ router.get('/api/accounts/:id/statement.pdf', authMiddleware, async (req, res) =
       periodLabel: label,
     });
 
-    const filename = `rubicon-statement-${account.currency || 'account'}-${new Date()
+    const filename = `fcf-statement-${account.currency || 'account'}-${new Date()
       .toISOString()
       .slice(0, 10)}.pdf`;
 

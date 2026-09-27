@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { getStoredAdminToken, setStoredAdminToken, clearStoredAdminToken } from '../lib/storageKeys';
 
 interface AdminUser {
   id: string;
@@ -16,7 +17,6 @@ interface AdminAuthContextType {
 
 const AdminAuthContext = createContext<AdminAuthContextType | null>(null);
 
-const ADMIN_TOKEN_KEY = 'rubicon_admin_token';
 const API = '/api';
 
 export function AdminAuthProvider({ children }: { children: ReactNode }) {
@@ -24,7 +24,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const refresh = async () => {
-    const token = localStorage.getItem(ADMIN_TOKEN_KEY);
+    const token = getStoredAdminToken();
     if (!token) { setAdmin(null); setLoading(false); return; }
     try {
       const res = await fetch(`${API}/admin/me`, {
@@ -34,7 +34,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
       const data = await res.json();
       setAdmin(data.user);
     } catch {
-      localStorage.removeItem(ADMIN_TOKEN_KEY);
+      clearStoredAdminToken();
       setAdmin(null);
     } finally {
       setLoading(false);
@@ -59,12 +59,12 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Admin login failed');
-    localStorage.setItem(ADMIN_TOKEN_KEY, data.token);
+    setStoredAdminToken(data.token);
     setAdmin(data.user);
   };
 
   const logout = () => {
-    localStorage.removeItem(ADMIN_TOKEN_KEY);
+    clearStoredAdminToken();
     setAdmin(null);
   };
 
@@ -82,5 +82,5 @@ export function useAdminAuth() {
 }
 
 export function getAdminToken() {
-  return localStorage.getItem(ADMIN_TOKEN_KEY);
+  return getStoredAdminToken();
 }

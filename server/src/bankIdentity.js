@@ -1,5 +1,5 @@
 /**
- * Rubicon Capital bank identity
+ * Finance Capital Florida bank identity
  *
  * Every account gets:
  *  - account_name   (display name, e.g. Everyday Checking)
@@ -10,7 +10,7 @@
 
 import { query } from './db.js';
 
-/** Fixed routing identifiers for Rubicon Capital (simulation). */
+/** Fixed routing identifiers for Finance Capital Florida (simulation). */
 export const ROUTING_BY_CURRENCY = {
   GBP: '04-00-26',   // UK-style sort code
   USD: '026009593',  // US-style ABA routing

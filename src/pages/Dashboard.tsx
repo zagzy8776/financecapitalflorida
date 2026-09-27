@@ -54,7 +54,7 @@ function last4(num?: string) {
 }
 
 export default function Dashboard() {
-  const { user, logout } = useAuth() as any;
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -151,8 +151,10 @@ export default function Dashboard() {
     try {
       if (typeof logout === 'function') logout();
       else {
-        localStorage.removeItem('token');
+        localStorage.removeItem('fcf_token');
+        localStorage.removeItem('rubicon_token');
         localStorage.removeItem('fc_token');
+        localStorage.removeItem('token');
       }
     } catch {
       /* silent */

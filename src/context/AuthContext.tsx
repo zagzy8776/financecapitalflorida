@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { api } from '../lib/api';
+import { getStoredToken, setStoredToken, clearStoredToken } from '../lib/storageKeys';
 
 interface User {
   id: string;
@@ -13,6 +14,7 @@ interface User {
   date_of_birth?: string;
   kyc_status?: string;
   account_status?: string;
+  avatar_url?: string;
   created_at?: string;
   last_login?: string;
 }
@@ -46,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const refresh = async () => {
-    const token = localStorage.getItem('rubicon_token');
+    const token = getStoredToken();
     if (!token) {
       setUser(null);
       setLoading(false);
@@ -56,7 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { user } = await api.me();
       setUser(user);
     } catch {
-      localStorage.removeItem('rubicon_token');
+      clearStoredToken();
       setUser(null);
     } finally {
       setLoading(false);
@@ -83,7 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       };
     }
     if (res?.token && res?.user) {
-      localStorage.setItem('rubicon_token', res.token);
+      setStoredToken(res.token);
       setUser(res.user);
       return null;
     }
@@ -92,7 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const verifyOtp = async (challengeId: string, code: string) => {
     const { user, token } = await api.verifyOtp({ challenge_id: challengeId, code });
-    localStorage.setItem('rubicon_token', token);
+    setStoredToken(token);
     setUser(user);
   };
 
@@ -112,12 +114,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     profile?: { phone?: string; date_of_birth?: string; address?: string; country?: string },
   ) => {
     const { user, token } = await api.register({ email, password, full_name, ...profile });
-    localStorage.setItem('rubicon_token', token);
+    setStoredToken(token);
     setUser(user);
   };
 
   const logout = () => {
-    localStorage.removeItem('rubicon_token');
+    clearStoredToken();
     setUser(null);
   };
 

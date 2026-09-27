@@ -215,7 +215,7 @@ export default function CryptoPage() {
         </Modal>
 
         <Modal open={showDeposit} onClose={() => { setShowDeposit(false); setFormError(''); }}
-          title="Request crypto deposit" description="Submit an amount to credit after review. Send only to your Rubicon wallet address.">
+          title="Request crypto deposit" description="Submit an amount to credit after review. Send only to your Finance Capital Florida wallet address.">
           <div className="space-y-4">
             {formError && <Alert tone="error">{formError}</Alert>}
             <Input

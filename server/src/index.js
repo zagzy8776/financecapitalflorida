@@ -256,7 +256,7 @@ app.get('/api/cron/daily-digest', authorizeCron, runDailyDigest);
 app.post('/api/cron/daily-digest', authorizeCron, runDailyDigest);
 
 app.get('/api/cron/health', authorizeCron, (req, res) => {
-  res.json({ ok: true, service: 'rubicon-cron' });
+  res.json({ ok: true, service: 'fcf-cron' });
 });
 
 export default app;

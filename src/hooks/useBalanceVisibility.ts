@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-const STORAGE_KEY = 'rubicon_hide_balances';
+const STORAGE_KEY = 'fcf_hide_balances';
 
 /**
  * Balance visibility preference with session persistence (Req 5.4).

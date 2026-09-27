@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api, formatMoney } from '../lib/api';
+import { getStoredAdminToken } from '../lib/storageKeys';
 import { Alert, Button, Input, Modal, Select } from './ui';
 
 type Props = {
@@ -156,7 +157,7 @@ export default function AdminCustomerModal({ open, userId, accountHint, onClose,
         is_locked: !!profile.is_locked,
       });
       if (profile.avatar_url && String(profile.avatar_url).startsWith('data:image/')) {
-        const token = localStorage.getItem('rubicon_admin_token');
+        const token = getStoredAdminToken();
         const res = await fetch(`/api/admin/users/${userId}/avatar`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },

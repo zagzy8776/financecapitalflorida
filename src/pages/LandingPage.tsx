@@ -326,7 +326,7 @@ export default function LandingPage() {
             <a href="#about" className="hover:text-white transition">About</a>
             <a href="/terms" className="hover:text-white transition">Terms</a>
             <a href="/privacy" className="hover:text-white transition">Privacy</a>
-            <a href="mailto:support@financecapitalflorida.com" className="hover:text-white transition">Support</a>
+            <a href="mailto:support@financecapitals.org" className="hover:text-white transition">Support</a>
           </div>
         </div>
       </footer>

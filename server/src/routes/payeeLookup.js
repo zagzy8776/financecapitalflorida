@@ -4,8 +4,8 @@ import { authMiddleware, adminMiddleware } from '../auth.js';
 
 const router = Router();
 
-const SUPPORT_WHATSAPP = (process.env.SUPPORT_WHATSAPP || '+447448216273').replace(/\s+/g, '');
-const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || 'support@rubiconcapital.org';
+const SUPPORT_WHATSAPP = (process.env.SUPPORT_WHATSAPP || '+19412831579').replace(/\s+/g, '');
+const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || 'support@financecapitals.org';
 
 query(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT`).catch((e) => {
   console.warn('avatar_url column:', e.message);

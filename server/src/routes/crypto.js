@@ -119,7 +119,7 @@ router.patch('/api/admin/crypto/:id', authMiddleware, adminMiddleware, async (re
         bodyHtml: `<p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#cbd5e1;">Hello ${escapeHtml((contact.full_name || '').split(' ')[0] || 'Client')}, your <strong style="color:#f8fafc;">${escapeHtml(crypto.asset)}</strong> account is now <strong>${escapeHtml(status)}</strong>.</p>
           <table role="presentation" width="100%">${row('Asset', escapeHtml(crypto.asset))}${row('Wallet', escapeHtml(crypto.wallet_address || '—'))}${row('Status', escapeHtml(status))}</table>`,
       });
-      await sendEmail({ to: contact.email, subject: `Rubicon Capital — ${title}`, html });
+      await sendEmail({ to: contact.email, subject: `Finance Capital Florida — ${title}`, html });
     })());
 
     res.json({ success: true });
@@ -161,7 +161,7 @@ router.post('/api/admin/crypto/:id/adjust', authMiddleware, adminMiddleware, asy
           bodyHtml: `<p style="margin:0 0 8px;font-size:24px;font-weight:700;color:#f8fafc;">${amt > 0 ? '+' : ''}${amt} ${escapeHtml(crypto.asset)}</p>
             <table role="presentation" width="100%">${row('New balance', escapeHtml(String(newBal)))}${row('Asset', escapeHtml(crypto.asset))}</table>`,
         });
-        await sendEmail({ to: contact.email, subject: `Rubicon Capital — ${crypto.asset} balance updated`, html });
+        await sendEmail({ to: contact.email, subject: `Finance Capital Florida — ${crypto.asset} balance updated`, html });
       })());
 
       return { newBalance: newBal };

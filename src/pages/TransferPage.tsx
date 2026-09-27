@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api, formatMoney } from '../lib/api';
+import { getStoredToken } from '../lib/storageKeys';
 import { currencyMeta } from '../lib/currencies';
 import { maskAccountNumber, formatRelativeDay } from '../lib/format';
 import {
@@ -85,7 +86,7 @@ export default function TransferPage() {
     let dead = false;
     const t = setTimeout(async () => {
       try {
-        const token = localStorage.getItem('rubicon_token');
+        const token = getStoredToken();
         const res = await fetch(`/api/transfers/lookup?number=${encodeURIComponent(cleaned)}`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });

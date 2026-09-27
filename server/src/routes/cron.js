@@ -5,7 +5,7 @@
  *   or header x-cron-secret: <CRON_SECRET>
  *
  * Example:
- *   GET or POST https://www.rubiconcapital.org/api/cron/daily-digest
+ *   GET or POST https://YOUR-APP-URL/api/cron/daily-digest
  */
 import { Router } from 'express';
 import { query } from '../db.js';
@@ -70,7 +70,7 @@ router.get('/api/cron/daily-digest', authorizeCron, runDailyDigest);
 router.post('/api/cron/daily-digest', authorizeCron, runDailyDigest);
 
 router.get('/api/cron/health', authorizeCron, (req, res) => {
-  res.json({ ok: true, service: 'rubicon-cron' });
+  res.json({ ok: true, service: 'fcf-cron' });
 });
 
 export default router;

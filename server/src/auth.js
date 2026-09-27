@@ -25,7 +25,7 @@ export function verifyToken(token) {
     return jwt.verify(token, JWT_SECRET);
   } catch (primaryError) {
     // Existing customer sessions created before the Finance Capital Florida
-    // migration were signed with the legacy Rubicon fallback secret. Accept
+    // migration were signed with the legacy fallback secret. Accept
     // those sessions only as a short-lived migration bridge (JWT expiration
     // still applies), while all new tokens use JWT_SECRET.
     try {

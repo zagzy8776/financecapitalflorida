@@ -92,7 +92,7 @@ router.post('/api/auth/forgot-password', async (req, res) => {
       [user.id, token_hash, expires.toISOString()]
     );
 
-    const appUrl = process.env.APP_URL || process.env.VITE_APP_URL || 'https://www.rubiconcapital.org';
+    const appUrl = process.env.APP_URL || process.env.VITE_APP_URL || 'https://www.financecapitals.org';
     const resetUrl = `${appUrl}/reset-password?token=${token}`;
 
     voidEmail(emailPasswordReset({

@@ -23,9 +23,25 @@ import {
 
 type SignupStep = 'credentials' | 'personal';
 
-const TRUSTED_KEY = 'rubicon_trusted_device';
-const REMEMBER_EMAIL_KEY = 'rubicon_remember_email';
+const TRUSTED_KEY = 'fcf_trusted_device';
+const REMEMBER_EMAIL_KEY = 'fcf_remember_email';
 const TRUST_DAYS = 30;
+
+function migrateLocalKey(newKey: string, legacyKeys: string[]) {
+  try {
+    if (localStorage.getItem(newKey)) return;
+    for (const old of legacyKeys) {
+      const val = localStorage.getItem(old);
+      if (val) {
+        localStorage.setItem(newKey, val);
+        localStorage.removeItem(old);
+        return;
+      }
+    }
+  } catch { /* private mode */ }
+}
+migrateLocalKey(TRUSTED_KEY, ['rubicon_trusted_device']);
+migrateLocalKey(REMEMBER_EMAIL_KEY, ['rubicon_remember_email']);
 
 const COUNTRIES = [
   { code: 'GB', label: 'United Kingdom' },

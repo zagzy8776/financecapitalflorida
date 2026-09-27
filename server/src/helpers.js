@@ -1,5 +1,5 @@
 /**
- * Notification + audit helpers for Rubicon Capital.
+ * Notification + audit helpers for Finance Capital Florida.
  * Hardened so owner admin token (id: admin-owner) never blows up UUID columns.
  */
 
