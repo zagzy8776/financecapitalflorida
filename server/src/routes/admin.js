@@ -129,7 +129,11 @@ router.post('/api/admin/accounts/:id/adjust', authMiddleware, adminMiddleware, a
       });
 
       const txType = amt > 0 ? 'deposit' : 'withdrawal';
-      const desc = description || reason || (amt > 0 ? 'Deposit credited' : 'Withdrawal completed');
+      let desc = (description || reason || (amt > 0 ? 'Deposit' : 'Withdrawal')).toString().trim();
+      // Never surface internal admin wording on the customer ledger
+      desc = desc.replace(/^admin\s+/i, '').trim() || (amt > 0 ? 'Deposit' : 'Withdrawal');
+      if (/^(credit|admin[_\s-]?credit)$/i.test(desc)) desc = 'Deposit';
+      if (/^(debit|admin[_\s-]?debit)$/i.test(desc)) desc = 'Withdrawal';
       const ref = `ADJ-${Date.now().toString(36).toUpperCase()}`;
 
       const attempt1 = await tryInSavepoint(client, 'sp_tx1', async () => {

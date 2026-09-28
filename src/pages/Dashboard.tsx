@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { api, formatMoney } from '../lib/api';
 import { CURRENCIES, currencyMeta } from '../lib/currencies';
-import { maskAccountNumber, maskBalance, titleCase, formatRelativeDay } from '../lib/format';
+import { maskAccountNumber, maskBalance, titleCase, formatRelativeDay, transactionLabel } from '../lib/format';
 import { useBalanceVisibility } from '../hooks/useBalanceVisibility';
 import {
   Alert, Button, EmptyState, IconButton, Input, Modal, SectionHeading,
@@ -477,7 +477,7 @@ export default function Dashboard() {
                       </span>
                       <div className="min-w-0">
                         <p className="text-sm font-semibold text-[#0c1b33] truncate">
-                          {tx.description || titleCase((tx.type || '').replace(/_/g, ' '))}
+                          {transactionLabel(tx.type, tx.description)}
                         </p>
                         <p className="text-[11px] text-[#8a97a7] mt-0.5">{formatRelativeDay(tx.created_at)}</p>
                       </div>

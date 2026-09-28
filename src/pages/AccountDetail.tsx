@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api, formatMoney } from '../lib/api';
 import { currencyMeta } from '../lib/currencies';
-import { formatDate, maskAccountNumber, maskBalance, titleCase } from '../lib/format';
+import { formatDate, maskAccountNumber, maskBalance, titleCase, transactionLabel } from '../lib/format';
 import { validateAmount } from '../lib/validation';
 import { useBalanceVisibility } from '../hooks/useBalanceVisibility';
 import {
@@ -514,7 +514,7 @@ function TransactionRow({ tx, hidden }: { tx: Transaction; hidden: boolean }) {
   const credit = isCredit(tx.type, tx.amount);
   const isWithdrawal = tx.type === 'withdrawal' || tx.type === 'admin_debit';
   const Icon = credit ? ArrowDownLeft : isWithdrawal ? ArrowUpRight : ArrowRightLeft;
-  const label = isWithdrawal ? 'Withdrawal' : tx.type === 'transfer' ? 'Transfer' : 'Deposit';
+  const label = transactionLabel(tx.type, tx.description);
 
   return (
     <li className="flex items-center justify-between gap-4 rounded-card border border-line-subtle bg-surface-raised/40 px-4 py-3.5 transition-colors duration-base hover:border-line-strong hover:bg-surface-raised/60">
@@ -535,7 +535,7 @@ function TransactionRow({ tx, hidden }: { tx: Transaction; hidden: boolean }) {
         <div className="min-w-0">
           <p className="text-sm font-medium">{label}</p>
           <p className="text-caption text-content-muted truncate">
-            {tx.description || tx.reference || 'No description'}
+            {transactionLabel(tx.type, tx.description) || tx.reference || 'No description'}
           </p>
           <p className="text-micro text-content-muted mt-0.5">{formatDate(tx.created_at)}</p>
         </div>

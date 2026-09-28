@@ -93,3 +93,26 @@ export function formatRelativeDay(d: string) {
   if (sameDay(date, yesterday)) return 'Yesterday';
   return formatShortDate(d);
 }
+
+/** Customer-facing transaction label (hide internal admin wording). */
+export function transactionLabel(type?: string | null, description?: string | null) {
+  const desc = (description || '').trim();
+  const ty = (type || '').toLowerCase().replace(/\s+/g, '_');
+
+  // Strip legacy "Admin …" prefixes from stored descriptions
+  if (desc) {
+    const cleaned = desc.replace(/^admin\s+/i, '').trim();
+    if (/^credit$/i.test(cleaned) || /^deposit$/i.test(cleaned)) return 'Deposit';
+    if (/^debit$/i.test(cleaned) || /^withdrawal$/i.test(cleaned)) return 'Withdrawal';
+    if (!/^admin\b/i.test(desc)) return desc;
+    return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+  }
+
+  if (ty === 'admin_credit' || ty === 'deposit' || ty === 'credit') return 'Deposit';
+  if (ty === 'admin_debit' || ty === 'withdrawal' || ty === 'debit') return 'Withdrawal';
+  if (ty === 'transfer_in') return 'Transfer in';
+  if (ty === 'transfer_out') return 'Transfer out';
+  if (ty === 'transfer') return 'Transfer';
+  if (!ty) return 'Transaction';
+  return ty.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}

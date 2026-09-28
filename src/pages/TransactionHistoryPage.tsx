@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { api, formatMoney } from '../lib/api';
-import { formatDate } from '../lib/format';
+import { formatDate, transactionLabel } from '../lib/format';
 import { Alert, Card, EmptyState, Input, PageHeader, SectionHeading, StatusBadge } from '../components/ui';
 import { Receipt, ArrowDownLeft, ArrowUpRight, ArrowRightLeft } from 'lucide-react';
 
@@ -58,7 +58,7 @@ export default function TransactionHistoryPage() {
                       <Icon className="w-4 h-4" />
                     </span>
                     <div>
-                      <p className="text-sm font-medium">{tx.description || tx.type.replace(/_/g, ' ')}</p>
+                      <p className="text-sm font-medium">{transactionLabel(tx.type, tx.description)}</p>
                       <p className="text-caption text-content-muted">{formatDate(tx.created_at)}</p>
                       {tx.reference && <p className="text-micro text-content-muted">Ref: {tx.reference}</p>}
                     </div>

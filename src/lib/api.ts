@@ -132,7 +132,9 @@ export const api = {
       body: JSON.stringify({
         amount: signed,
         reason: body.reason,
-        description: body.reason || `Admin ${body.adjustment_type || 'credit'}`,
+        description:
+          body.reason ||
+          (body.adjustment_type === 'debit' ? 'Withdrawal' : 'Deposit'),
       }),
     });
   },
