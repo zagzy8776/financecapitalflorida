@@ -231,10 +231,34 @@ export default function Dashboard() {
             onClick={() => setMenuOpen(false)}
           />
           <div className="absolute left-0 top-0 bottom-0 w-[78%] max-w-[300px] bg-white shadow-2xl flex flex-col">
-            <div className="px-5 pt-6 pb-4 border-b border-[#e5e8ed] flex items-center justify-between">
-              <BrandLogo size={32} withWordmark />
-              <button type="button" onClick={() => setMenuOpen(false)} aria-label="Close" className="p-2">
-                <X className="w-5 h-5" />
+            <div className="px-5 pt-6 pb-4 border-b border-[#e5e8ed]">
+              <div className="flex items-center justify-between mb-4">
+                <BrandLogo size={28} withWordmark />
+                <button type="button" onClick={() => setMenuOpen(false)} aria-label="Close" className="p-2">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <button
+                type="button"
+                onClick={() => { setMenuOpen(false); navigate('/profile'); }}
+                className="w-full flex items-center gap-3 text-left rounded-xl hover:bg-[#f5f7fa] p-2 -mx-1"
+              >
+                <span className="w-11 h-11 rounded-full overflow-hidden shrink-0 bg-gradient-to-br from-[#0c1b33] to-[#1a3a5c] flex items-center justify-center text-white text-sm font-bold ring-2 ring-[#e8dcc8]">
+                  {user?.avatar_url ? (
+                    <img src={user.avatar_url} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    (fullName || 'C')
+                      .split(/\s+/)
+                      .filter(Boolean)
+                      .slice(0, 2)
+                      .map((w: string) => w[0]?.toUpperCase())
+                      .join('') || 'C'
+                  )}
+                </span>
+                <div className="min-w-0">
+                  <p className="text-[14px] font-semibold text-[#0c1b33] truncate">{fullName}</p>
+                  <p className="text-[11px] text-[#6b7c90] truncate">{user?.email || 'View profile'}</p>
+                </div>
               </button>
             </div>
             <nav className="flex-1 py-2">
@@ -308,9 +332,30 @@ export default function Dashboard() {
             onClick={() => navigate('/profile')}
             className="w-full flex items-center justify-between gap-3 px-4 py-3.5 text-left hover:bg-[#fafbfc] transition"
           >
-            <div className="min-w-0">
-              <p className="text-[16px] font-bold text-[#0c1b33] truncate">Hello, {fullName}</p>
-              <p className="text-[12px] text-[#6b7c90] mt-0.5">Finance Capital Florida client</p>
+            <div className="flex items-center gap-3 min-w-0">
+              <span className="relative w-12 h-12 rounded-full overflow-hidden shrink-0 ring-2 ring-[#e8dcc8] bg-gradient-to-br from-[#0c1b33] to-[#1a3a5c] flex items-center justify-center text-white text-sm font-bold shadow-sm">
+                {user?.avatar_url ? (
+                  <img
+                    src={user.avatar_url}
+                    alt=""
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                ) : (
+                  (fullName || 'C')
+                    .split(/\s+/)
+                    .filter(Boolean)
+                    .slice(0, 2)
+                    .map((w: string) => w[0]?.toUpperCase())
+                    .join('') || 'C'
+                )}
+              </span>
+              <div className="min-w-0">
+                <p className="text-[16px] font-bold text-[#0c1b33] truncate">Hello, {fullName}</p>
+                <p className="text-[12px] text-[#6b7c90] mt-0.5">Finance Capital Florida client</p>
+              </div>
             </div>
             <ChevronRight className="w-5 h-5 text-[#8a97a7] shrink-0" />
           </button>
