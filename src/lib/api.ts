@@ -81,6 +81,11 @@ export const api = {
   resendOtp: (body: { challenge_id: string }) =>
     request('/auth/resend-otp', { method: 'POST', body: JSON.stringify(body) }),
   me: () => request('/auth/me'),
+  uploadAvatar: (image: string) =>
+    request('/profile/avatar', { method: 'PATCH', body: JSON.stringify({ image }) }),
+  removeAvatar: () =>
+    request('/profile/avatar', { method: 'PATCH', body: JSON.stringify({ image: '' }) }),
+
 
   changePassword: (body: { current_password: string; new_password: string }) =>
     request('/auth/change-password', { method: 'POST', body: JSON.stringify(body) }),
@@ -165,6 +170,10 @@ export const api = {
     adminRequest(`/admin/withdrawals/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
 
   adminDeposits: (status = 'all') => adminRequest(`/admin/deposits?status=${status}`),
+  adminTransfers: (status = 'pending') => adminRequest(`/admin/transfers?status=${status}`),
+  reviewTransfer: (id: string, body: { status: string; admin_note?: string }) =>
+    adminRequest(`/admin/transfers/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
+
   reviewDeposit: (id: string, body: { status: string; admin_note?: string }) =>
     adminRequest(`/admin/deposits/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
 

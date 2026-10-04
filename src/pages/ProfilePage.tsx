@@ -8,7 +8,7 @@ import { Badge, Button, Card, Input, Modal, PageHeader, StatusBadge } from '../c
 import { SettingsRow, SettingsSection, SettingsToggle } from '../components/ui/SettingsRow';
 import {
   Bell, Calendar, Globe2, HelpCircle, KeyRound, Landmark,
-  LifeBuoy, Lock, LogOut, Mail, MapPin, Phone, ShieldCheck, Smartphone,
+  Camera, LifeBuoy, Lock, LogOut, Mail, MapPin, Phone, ShieldCheck, Smartphone,
   User, FileText, Scale, Info,
 } from 'lucide-react';
 
@@ -45,6 +45,7 @@ export default function ProfilePage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [avatarBusy, setAvatarBusy] = useState(false);
   const [currentPw, setCurrentPw] = useState('');
   const [newPw, setNewPw] = useState('');
   const [confirmPw, setConfirmPw] = useState('');
@@ -60,6 +61,35 @@ export default function ProfilePage() {
   );
 
   const avatarUrl = user?.avatar_url;
+  const handleAvatarFile = async (file: File | null) => {
+    if (!file) return;
+    if (!/^image\/(jpeg|jpg|png|webp)$/i.test(file.type)) {
+      setError('Please choose a JPEG, PNG, or WebP photo.');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Photo must be under 5 MB.');
+      return;
+    }
+    setAvatarBusy(true);
+    setError('');
+    try {
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ''));
+        reader.onerror = () => reject(new Error('Could not read file'));
+        reader.readAsDataURL(file);
+      });
+      await api.uploadAvatar(dataUrl);
+      await refresh();
+      setSuccess('Profile photo updated.');
+    } catch (e: any) {
+      setError(e?.message || 'Could not upload photo');
+    } finally {
+      setAvatarBusy(false);
+    }
+  };
+
 
   useEffect(() => {
     refresh().catch(() => {});
@@ -158,16 +188,57 @@ export default function ProfilePage() {
 
         <Card className="p-6">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white font-bold text-xl shrink-0 overflow-hidden">
-              {avatarUrl ? <img src={avatarUrl} alt="" className="w-full h-full object-cover" /> : getInitials(user?.full_name)}
+            <div className="relative shrink-0">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#0c1b33] to-[#1a3a5c] flex items-center justify-center text-white font-bold text-xl overflow-hidden ring-2 ring-[#b68a45]/40 shadow-md">
+                {avatarUrl ? <img src={avatarUrl} alt="" className="w-full h-full object-cover" /> : getInitials(user?.full_name)}
+              </div>
+              <label
+                className={`absolute -bottom-1 -right-1 w-9 h-9 rounded-full bg-[#0c1b33] text-white flex items-center justify-center shadow-lg border-2 border-white cursor-pointer hover:bg-[#1a3a5c] transition ${avatarBusy ? 'opacity-60 pointer-events-none' : ''}`}
+                title="Change photo"
+              >
+                <Camera className="w-4 h-4" />
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="sr-only"
+                  disabled={avatarBusy}
+                  onChange={(e) => {
+                    const f = e.target.files?.[0] || null;
+                    e.target.value = '';
+                    void handleAvatarFile(f);
+                  }}
+                />
+              </label>
             </div>
             <div className="min-w-0 flex-1">
               <h2 className="text-lg font-semibold text-content-primary truncate">{user?.full_name}</h2>
               <p className="text-caption text-content-muted truncate">{user?.email}</p>
-              <div className="flex items-center gap-2 mt-2">
+              <div className="flex items-center gap-2 mt-2 flex-wrap">
                 <StatusBadge status={user?.is_locked ? 'locked' : 'active'} />
                 <Badge tone="neutral" dot>Email on file</Badge>
+                {avatarBusy && <span className="text-caption text-content-muted">Uploading…</span>}
               </div>
+              {avatarUrl && (
+                <button
+                  type="button"
+                  className="mt-2 text-caption text-red-500/90 hover:text-red-400"
+                  disabled={avatarBusy}
+                  onClick={async () => {
+                    setAvatarBusy(true);
+                    try {
+                      await api.removeAvatar();
+                      await refresh();
+                      setSuccess('Profile photo removed.');
+                    } catch (e: any) {
+                      setError(e?.message || 'Could not remove photo');
+                    } finally {
+                      setAvatarBusy(false);
+                    }
+                  }}
+                >
+                  Remove photo
+                </button>
+              )}
             </div>
           </div>
           <div className="mt-4 pt-4 border-t border-line-subtle flex items-center justify-between text-caption text-content-muted">

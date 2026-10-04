@@ -3,7 +3,7 @@
  */
 import { Router } from 'express';
 import { query, withTransaction } from '../db.js';
-import { authMiddleware } from '../auth.js';
+import { authMiddleware, adminMiddleware } from '../auth.js';
 import { createNotification } from '../helpers.js';
 import { assertTransactionPin } from './pin.js';
 import {
@@ -37,10 +37,11 @@ async function tryInSavepoint(client, name, fn) {
 }
 
 async function insertLedger(client, spPrefix, {
-  accountId, userId, type, amount, currency, description, reference,
+  accountId, userId, type, amount, currency, description, reference, status = 'completed',
 }) {
   const abs = Math.abs(Number(amount));
   if (!(abs > 0)) throw new Error('Invalid ledger amount');
+  const st = status || 'completed';
   const typeAttempts = [type];
   if (type === 'transfer_out') typeAttempts.push('withdrawal', 'transfer', 'debit');
   if (type === 'transfer_in') typeAttempts.push('deposit', 'transfer', 'credit');
@@ -49,8 +50,8 @@ async function insertLedger(client, spPrefix, {
     const a1 = await tryInSavepoint(client, `${spPrefix}_a${i}`, async () => {
       return client.query(
         `INSERT INTO transactions (account_id, user_id, type, amount, currency, description, reference, status)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, 'completed') RETURNING *`,
-        [accountId, userId, t, abs, currency, description, reference]
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+        [accountId, userId, t, abs, currency, description, reference, st]
       );
     });
     if (a1.ok) return a1.result;
@@ -116,6 +117,12 @@ router.post('/api/transfers', authMiddleware, async (req, res) => {
         throw new Error('Recipient account is not active');
       }
 
+      // Hold: debit sender immediately; transfer stays pending until admin releases or blocks.
+      // Env TRANSFER_AUTO_COMPLETE=true completes internal transfers instantly (legacy behaviour).
+      const autoComplete = String(process.env.TRANSFER_AUTO_COMPLETE || '').toLowerCase() === 'true';
+      const transferType = recipient ? 'INTERNAL_TRANSFER' : 'EXTERNAL_TRANSFER';
+      const initialStatus = autoComplete && recipient ? 'completed' : 'pending';
+
       await client.query(`UPDATE accounts SET balance = balance - $1 WHERE id = $2`, [amt, from_account_id]);
       await tryInSavepoint(client, 'sp_avail_out', async () => {
         await client.query(
@@ -134,11 +141,11 @@ router.post('/api/transfers', authMiddleware, async (req, res) => {
         currency: sender.currency,
         description: descOut,
         reference: ref,
+        status: initialStatus,
       });
 
       let recipientTx = null;
-      let transferType = 'EXTERNAL_TRANSFER';
-      if (recipient) {
+      if (recipient && initialStatus === 'completed') {
         await client.query(`UPDATE accounts SET balance = balance + $1 WHERE id = $2`, [amt, recipient.id]);
         await tryInSavepoint(client, 'sp_avail_in', async () => {
           await client.query(
@@ -155,8 +162,8 @@ router.post('/api/transfers', authMiddleware, async (req, res) => {
           currency: recipient.currency,
           description: descIn,
           reference: ref,
+          status: 'completed',
         });
-        transferType = 'INTERNAL_TRANSFER';
       }
 
       const senderBal = await client.query(`SELECT balance FROM accounts WHERE id = $1`, [from_account_id]);
@@ -169,18 +176,27 @@ router.post('/api/transfers', authMiddleware, async (req, res) => {
         toNumber: cleanTo,
         transferType,
         ref,
+        status: initialStatus,
+        recipientAccountId: recipient?.id || null,
       };
       return {
         transfer: senderTx.rows[0],
         recipientTx: recipientTx?.rows[0] || null,
         transferType,
+        status: initialStatus,
+        held: initialStatus === 'pending',
         senderBalance: senderBal.rows[0]?.balance,
         currency: sender.currency,
+        message:
+          initialStatus === 'pending'
+            ? 'Transfer submitted and is pending review. Funds are on hold until released.'
+            : 'Transfer completed.',
       };
     });
 
     if (notifyPayload) {
-      if (notifyPayload.recipientUserId) {
+      const pending = notifyPayload.status === 'pending';
+      if (!pending && notifyPayload.recipientUserId) {
         await createNotification(
           notifyPayload.recipientUserId,
           'transfer_received',
@@ -191,10 +207,12 @@ router.post('/api/transfers', authMiddleware, async (req, res) => {
       }
       await createNotification(
         notifyPayload.senderUserId,
-        'transfer_sent',
-        'Transfer successful',
-        `You sent ${notifyPayload.amt.toLocaleString('en-GB')} ${notifyPayload.currency} to ${notifyPayload.toNumber}.`,
-        { amount: notifyPayload.amt, to: notifyPayload.toNumber, reference: notifyPayload.ref }
+        pending ? 'transfer_pending' : 'transfer_sent',
+        pending ? 'Transfer pending review' : 'Transfer successful',
+        pending
+          ? `Your transfer of ${notifyPayload.amt.toLocaleString('en-GB')} ${notifyPayload.currency} to ${notifyPayload.toNumber} is pending review. Funds are on hold.`
+          : `You sent ${notifyPayload.amt.toLocaleString('en-GB')} ${notifyPayload.currency} to ${notifyPayload.toNumber}.`,
+        { amount: notifyPayload.amt, to: notifyPayload.toNumber, reference: notifyPayload.ref, status: notifyPayload.status }
       ).catch(() => {});
 
       const when = new Date().toUTCString();
@@ -272,6 +290,140 @@ router.get('/api/transfers', authMiddleware, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to fetch transfers' });
+  }
+});
+
+
+// ---------- Admin: list / release / block held transfers ----------
+router.get('/api/admin/transfers', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const status = String(req.query.status || 'pending').toLowerCase();
+    let sql = `
+      SELECT t.*, a.account_number AS from_account_number, a.currency AS account_currency,
+             p.full_name AS customer_name, p.email AS customer_email
+      FROM transactions t
+      JOIN accounts a ON a.id = t.account_id
+      LEFT JOIN profiles p ON p.id = t.user_id
+      WHERE t.type IN ('transfer_out', 'transfer', 'withdrawal')
+    `;
+    const params = [];
+    if (status !== 'all') {
+      params.push(status);
+      sql += ` AND COALESCE(t.status, 'completed') = $1`;
+    }
+    sql += ` ORDER BY t.created_at DESC LIMIT 200`;
+    const { rows } = await query(sql, params);
+    res.json({ transfers: rows });
+  } catch (err) {
+    console.error('admin transfers list:', err);
+    res.status(500).json({ error: 'Failed to load transfers' });
+  }
+});
+
+router.patch('/api/admin/transfers/:id', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const action = String(req.body?.status || req.body?.action || '').toLowerCase();
+    // completed | released | approve → release hold
+    // rejected | blocked | block → refund sender
+    if (!['completed', 'released', 'approved', 'approve', 'rejected', 'blocked', 'block'].includes(action)) {
+      return res.status(400).json({ error: 'status must be completed (release) or blocked/rejected' });
+    }
+    const release = ['completed', 'released', 'approved', 'approve'].includes(action);
+    const finalStatus = release ? 'completed' : (action === 'blocked' || action === 'block' ? 'blocked' : 'rejected');
+    const adminNote = req.body?.admin_note ? String(req.body.admin_note).slice(0, 500) : null;
+
+    const result = await withTransaction(async (client) => {
+      const txRes = await client.query(
+        `SELECT * FROM transactions WHERE id = $1 FOR UPDATE`,
+        [req.params.id]
+      );
+      const tx = txRes.rows[0];
+      if (!tx) throw new Error('Transfer not found');
+      if (String(tx.status || '').toLowerCase() !== 'pending') {
+        throw new Error(`Transfer is already ${tx.status || 'completed'}`);
+      }
+
+      const amount = Math.abs(parseFloat(tx.amount) || 0);
+      if (!(amount > 0)) throw new Error('Invalid transfer amount');
+
+      // Parse destination from description "Transfer to ACCOUNT"
+      const toMatch = String(tx.description || '').match(/Transfer to ([A-Z0-9-]+)/i);
+      const toNumber = toMatch?.[1] || null;
+
+      if (release) {
+        // Credit recipient if on-platform
+        if (toNumber) {
+          const recip = await client.query(
+            `SELECT * FROM accounts WHERE account_number = $1 FOR UPDATE`,
+            [toNumber]
+          );
+          const recipient = recip.rows[0];
+          if (recipient) {
+            await client.query(`UPDATE accounts SET balance = balance + $1 WHERE id = $2`, [amount, recipient.id]);
+            await tryInSavepoint(client, 'sp_rel_avail', async () => {
+              await client.query(
+                `UPDATE accounts SET available_balance = COALESCE(available_balance, balance) + $1 WHERE id = $2`,
+                [amount, recipient.id]
+              );
+            });
+            await insertLedger(client, 'sp_rel_in', {
+              accountId: recipient.id,
+              userId: recipient.user_id,
+              type: 'transfer_in',
+              amount,
+              currency: recipient.currency || tx.currency,
+              description: `Transfer from ${tx.account_id}`,
+              reference: tx.reference,
+              status: 'completed',
+            });
+          }
+        }
+        await client.query(
+          `UPDATE transactions SET status = 'completed', description = CASE
+             WHEN $2::text IS NOT NULL AND $2 <> '' THEN description || ' · ' || $2
+             ELSE description END
+           WHERE id = $1`,
+          [tx.id, adminNote]
+        );
+      } else {
+        // Block / reject — refund sender
+        await client.query(`UPDATE accounts SET balance = balance + $1 WHERE id = $2`, [amount, tx.account_id]);
+        await tryInSavepoint(client, 'sp_ref_avail', async () => {
+          await client.query(
+            `UPDATE accounts SET available_balance = COALESCE(available_balance, balance) + $1 WHERE id = $2`,
+            [amount, tx.account_id]
+          );
+        });
+        await client.query(
+          `UPDATE transactions SET status = $2, description = CASE
+             WHEN $3::text IS NOT NULL AND $3 <> '' THEN description || ' · ' || $3
+             ELSE description || ' · ' || $2 END
+           WHERE id = $1`,
+          [tx.id, finalStatus, adminNote]
+        );
+      }
+
+      return { tx, amount, finalStatus, toNumber };
+    });
+
+    // Notify sender
+    if (result?.tx?.user_id) {
+      const verb = release ? 'released' : 'blocked';
+      await createNotification(
+        result.tx.user_id,
+        release ? 'transfer_released' : 'transfer_blocked',
+        release ? 'Transfer released' : 'Transfer blocked',
+        release
+          ? `Your transfer of ${result.amount} has been completed.`
+          : `Your transfer of ${result.amount} was ${result.finalStatus}. Funds have been returned to your account.`,
+        { transfer_id: result.tx.id, status: result.finalStatus }
+      ).catch(() => {});
+    }
+
+    res.json({ success: true, status: result.finalStatus, transfer_id: req.params.id });
+  } catch (err) {
+    console.error('admin transfer review:', err);
+    res.status(400).json({ error: err.message || 'Could not update transfer' });
   }
 });
 

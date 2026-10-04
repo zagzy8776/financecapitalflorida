@@ -128,7 +128,7 @@ export default function TransferPage() {
     setBusy(true);
     try {
       const cleaned = toNumber.trim().replace(/\s+/g, '');
-      await api.initiateTransfer({
+      const res: any = await api.initiateTransfer({
         from_account_id: fromAccount,
         to_account_number: cleaned,
         amount: parseFloat(amount),
@@ -137,7 +137,14 @@ export default function TransferPage() {
       });
       const money = formatMoney(parseFloat(amount), sel?.currency || 'USD');
       const who = payee?.name ? ` to ${payee.name}` : ` to ${cleaned}`;
-      setOutcome({ ok: true, title: `${RAILS[rail].label} sent`, detail: `${money} sent${who}.` });
+      const held = !!res?.held || res?.status === 'pending';
+      setOutcome({
+        ok: true,
+        title: held ? `${RAILS[rail].label} pending` : `${RAILS[rail].label} sent`,
+        detail: held
+          ? `${money} is on hold pending review${who}. You will be notified when it is released or if it is blocked.`
+          : `${money} sent${who}.`,
+      });
       setStep('done');
       setToNumber(''); setAmount(''); setReference(''); setTransactionPin('');
       setRouting(''); setSwiftBic(''); setIban(''); setBankName('');
