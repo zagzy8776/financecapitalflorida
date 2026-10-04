@@ -142,7 +142,7 @@ export default function TransferPage() {
         ok: true,
         title: held ? `${RAILS[rail].label} pending` : `${RAILS[rail].label} sent`,
         detail: held
-          ? `${money} is on hold pending review${who}. You will be notified when it is released or if it is blocked.`
+          ? `${money} is on hold pending review${who}.`
           : `${money} sent${who}.`,
       });
       setStep('done');
