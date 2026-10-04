@@ -117,6 +117,23 @@ router.post('/api/transfers', authMiddleware, async (req, res) => {
         throw new Error('Recipient account is not active');
       }
 
+      // Prefer counterparty names on the ledger (not raw account numbers)
+      let senderName = null;
+      try {
+        const sn = await client.query(`SELECT full_name FROM profiles WHERE id = $1`, [req.user.id]);
+        senderName = (sn.rows[0]?.full_name || '').trim() || null;
+      } catch { /* ignore */ }
+      let recipientName = null;
+      if (recipient?.user_id) {
+        try {
+          const rn = await client.query(`SELECT full_name FROM profiles WHERE id = $1`, [recipient.user_id]);
+          recipientName = (rn.rows[0]?.full_name || '').trim() || null;
+        } catch { /* ignore */ }
+      }
+      if (!recipientName && recipient?.account_name) {
+        recipientName = String(recipient.account_name).trim() || null;
+      }
+
       // Hold: debit sender immediately; transfer stays pending until admin releases or blocks.
       // Env TRANSFER_AUTO_COMPLETE=true completes internal transfers instantly (legacy behaviour).
       const autoComplete = String(process.env.TRANSFER_AUTO_COMPLETE || '').toLowerCase() === 'true';
@@ -131,8 +148,12 @@ router.post('/api/transfers', authMiddleware, async (req, res) => {
         );
       });
 
-      const ref = (reference && String(reference).trim()) || `TRF-${Date.now().toString(36).toUpperCase()}`;
-      const descOut = `Transfer to ${cleanTo}${reference ? ` · ${reference}` : ''}`;
+      const baseRef = (reference && String(reference).trim()) || `TRF-${Date.now().toString(36).toUpperCase()}`;
+      const ref = `${baseRef}|to:${cleanTo}`;
+      const toLabel = recipientName || cleanTo;
+      const fromLabel = senderName || sender.account_number;
+      // Keep account number in description suffix only for admin matching; primary label is the name
+      const descOut = `Transfer to ${toLabel}${reference ? ` · ${reference}` : ''}`;
       const senderTx = await insertLedger(client, 'sp_out', {
         accountId: from_account_id,
         userId: req.user.id,
@@ -153,7 +174,7 @@ router.post('/api/transfers', authMiddleware, async (req, res) => {
             [amt, recipient.id]
           );
         });
-        const descIn = `Transfer from ${sender.account_number}${reference ? ` · ${reference}` : ''}`;
+        const descIn = `Transfer from ${fromLabel}${reference ? ` · ${reference}` : ''}`;
         recipientTx = await insertLedger(client, 'sp_in', {
           accountId: recipient.id,
           userId: recipient.user_id,
@@ -346,9 +367,19 @@ router.patch('/api/admin/transfers/:id', authMiddleware, adminMiddleware, async 
       const amount = Math.abs(parseFloat(tx.amount) || 0);
       if (!(amount > 0)) throw new Error('Invalid transfer amount');
 
-      // Parse destination from description "Transfer to ACCOUNT"
-      const toMatch = String(tx.description || '').match(/Transfer to ([A-Z0-9-]+)/i);
-      const toNumber = toMatch?.[1] || null;
+      // Destination account: prefer reference marker, then description, then trailing digits
+      let toNumber = null;
+      const refStr = String(tx.reference || '');
+      const refTo = refStr.match(/\|to:([A-Z0-9-]+)/i) || refStr.match(/to:([A-Z0-9-]+)/i);
+      if (refTo) toNumber = refTo[1];
+      if (!toNumber) {
+        const toMatch = String(tx.description || '').match(/Transfer to ([A-Z0-9-]{8,})/i);
+        toNumber = toMatch?.[1] || null;
+      }
+      if (!toNumber) {
+        const digits = String(tx.description || '').match(/\b(\d{10,14})\b/);
+        toNumber = digits?.[1] || null;
+      }
 
       if (release) {
         // Credit recipient if on-platform
@@ -366,13 +397,22 @@ router.patch('/api/admin/transfers/:id', authMiddleware, adminMiddleware, async 
                 [amount, recipient.id]
               );
             });
+            let fromLabel = null;
+            try {
+              const sn = await client.query(
+                `SELECT p.full_name, a.account_number FROM accounts a
+                 LEFT JOIN profiles p ON p.id = a.user_id WHERE a.id = $1`,
+                [tx.account_id]
+              );
+              fromLabel = (sn.rows[0]?.full_name || '').trim() || sn.rows[0]?.account_number || null;
+            } catch { /* ignore */ }
             await insertLedger(client, 'sp_rel_in', {
               accountId: recipient.id,
               userId: recipient.user_id,
               type: 'transfer_in',
               amount,
               currency: recipient.currency || tx.currency,
-              description: `Transfer from ${tx.account_id}`,
+              description: `Transfer from ${fromLabel || 'account'}`,
               reference: tx.reference,
               status: 'completed',
             });
