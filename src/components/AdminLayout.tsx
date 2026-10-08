@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../context/AdminAuthContext';
 import { cx } from '../lib/designTokens';
-import { Activity, ClipboardList, Coins, LayoutDashboard, LogOut, Shield, ScrollText, Users, Wallet, ArrowLeftRight, Menu, X } from 'lucide-react';
+import { Activity, ClipboardList, Coins, LayoutDashboard, LogOut, Shield, ScrollText, Users, Wallet, ArrowLeftRight, Menu, X, MessageSquare } from 'lucide-react';
 
-type AdminTab = 'overview'|'users'|'accounts'|'deposits'|'withdrawals'|'transfers'|'crypto'|'transactions'|'audit'|'activity';
+type AdminTab = 'overview'|'users'|'accounts'|'deposits'|'withdrawals'|'transfers'|'crypto'|'transactions'|'audit'|'activity'|'messages';
 const NAV_ITEMS:{id:AdminTab;label:string;icon:any}[]=[
  {id:'overview',label:'Overview',icon:LayoutDashboard},{id:'users',label:'Customers',icon:Users},
+ {id:'messages',label:'Messages',icon:MessageSquare},
  {id:'accounts',label:'Accounts',icon:Wallet},{id:'deposits',label:'Deposits',icon:ClipboardList},
  {id:'withdrawals',label:'Withdrawals',icon:ClipboardList},{id:'transfers',label:'Transfers',icon:ClipboardList},{id:'crypto',label:'Digital assets',icon:Coins},
  {id:'transactions',label:'Transactions',icon:ArrowLeftRight},{id:'audit',label:'Audit trail',icon:ScrollText},
