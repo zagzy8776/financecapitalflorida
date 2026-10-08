@@ -17,6 +17,7 @@ import transferRoutes from './routes/transfers.js';
 import payeeLookupRoutes from './routes/payeeLookup.js';
 import cryptoRoutes from './routes/crypto.js';
 import notificationRoutes from './routes/notifications.js';
+import supportChatRoutes from './routes/supportChat.js';
 import sessionRoutes from './routes/sessions.js';
 import statementRoutes from './routes/statements.js';
 import pinRoutes from './routes/pin.js';
@@ -48,6 +49,7 @@ app.use(transferRoutes);
 app.use(payeeLookupRoutes);
 app.use(cryptoRoutes);
 app.use(notificationRoutes);
+app.use(supportChatRoutes);
 app.use(sessionRoutes);
 app.use(statementRoutes);
 app.use(pinRoutes);
@@ -96,9 +98,6 @@ app.post('/api/auth/register', async (req, res) => {
       );
       user = rows[0];
     } catch (profileErr) {
-      // Vercel serverless functions do not run runMigrations() at startup.
-      // Keep registration compatible with an older profiles schema, then
-      // backfill optional profile fields when those columns exist.
       console.error('Registration profile insert with extended fields failed:', {
         code: profileErr?.code,
         message: profileErr?.message,
@@ -264,8 +263,6 @@ app.get('/api/cron/health', authorizeCron, (req, res) => {
 export default app;
 
 if (!process.env.VERCEL) {
-  // Render/Railway/Fly/local persistent API services run the full idempotent
-  // schema migration before accepting traffic.
   runMigrations().then(() => {
     app.listen(PORT, () => console.log(`Finance Capital Florida API on http://localhost:${PORT}`));
   }).catch(err => {
