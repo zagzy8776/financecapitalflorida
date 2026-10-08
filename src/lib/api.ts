@@ -86,7 +86,6 @@ export const api = {
   removeAvatar: () =>
     request('/profile/avatar', { method: 'PATCH', body: JSON.stringify({ image: '' }) }),
 
-
   changePassword: (body: { current_password: string; new_password: string }) =>
     request('/auth/change-password', { method: 'POST', body: JSON.stringify(body) }),
   forgotPassword: (email: string) =>
@@ -211,6 +210,16 @@ export const api = {
   markAllNotificationsRead: () =>
     request('/notifications/read-all', { method: 'POST' }),
 
+  supportThread: () => request('/support/thread'),
+  sendSupportMessage: (body: string) =>
+    request('/support/messages', { method: 'POST', body: JSON.stringify({ body }) }),
+  adminSupportThreads: () => adminRequest('/admin/support/threads'),
+  adminSupportThread: (id: string) => adminRequest(`/admin/support/threads/${id}`),
+  adminReplySupport: (id: string, body: string) =>
+    adminRequest(`/admin/support/threads/${id}/messages`, { method: 'POST', body: JSON.stringify({ body }) }),
+  adminSetSupportStatus: (id: string, status: 'open' | 'closed') =>
+    adminRequest(`/admin/support/threads/${id}/status`, { method: 'POST', body: JSON.stringify({ status }) }),
+
   getPinStatus: () => request('/profile/pin-status'),
   setPin: (body: { pin: string; current_pin?: string }) =>
     request('/profile/pin', { method: 'POST', body: JSON.stringify(body) }),
@@ -257,7 +266,7 @@ export const api = {
     }
     const blob = await res.blob();
     const disp = res.headers.get('Content-Disposition') || '';
-    const match = /filename="?([^\";]+)"?/.exec(disp);
+    const match = /filename=\"?([^\";]+)\"?/.exec(disp);
     const filename = match?.[1] || `finance-capital-statement.pdf`;
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
