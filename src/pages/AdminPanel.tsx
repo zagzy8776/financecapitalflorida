@@ -10,6 +10,7 @@ import AdminLayout, { type AdminTab } from '../components/AdminLayout';
 import EditTransactionModal from '../components/EditTransactionModal';
 import AdminCustomerModal from '../components/AdminCustomerModal';
 import { AdminExtraTabs } from '../components/AdminExtraTabs';
+import AdminMessageDesk from '../components/AdminMessageDesk';
 import {
   Activity, Lock, Plus, Shield, Users, Wallet,
 } from 'lucide-react';
@@ -56,6 +57,11 @@ export default function AdminPanel() {
   const selectTab = (t: Tab) => { setTab(t); setSearch(''); setError(''); };
 
   const loadTab = useCallback(async (target: Tab, query = '') => {
+    if (target === 'messages') {
+      setLoading(false);
+      setError('');
+      return;
+    }
     setLoading(true);
     setError('');
     try {
@@ -255,13 +261,15 @@ export default function AdminPanel() {
       {notice && <Alert tone="success" onDismiss={() => setNotice('')}>{notice}</Alert>}
       {actionError && <Alert tone="error" title="That change could not be saved" onDismiss={() => setActionError('')}>{actionError}</Alert>}
 
-      {SEARCHABLE.includes(tab) && (
+      {tab === 'messages' ? (
+        <AdminMessageDesk />
+      ) : SEARCHABLE.includes(tab) ? (
         <div className="mb-6 md:hidden">
           <SearchField value={search} onChange={setSearch} onSubmit={() => loadTab(tab, search)} placeholder={`Search ${tab}…`} />
         </div>
-      )}
+      ) : null}
 
-      {loading ? (
+      {tab !== 'messages' && (loading ? (
         <LoadingState label="Loading admin data…"><SkeletonList count={4} /></LoadingState>
       ) : error ? (
         <ErrorState message={error} onRetry={() => loadTab(tab, search)} />
@@ -331,7 +339,7 @@ export default function AdminPanel() {
             openCreate={() => { setCreateError(''); setShowCreate(true); }}
           />
         </>
-      )}
+      ))}
 
       <EditTransactionModal
         transaction={editTx}
