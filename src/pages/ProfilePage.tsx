@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { getStoredToken } from '../lib/storageKeys';
 import { useAuth } from '../context/AuthContext';
-import { formatShortDate } from '../lib/format';
 import { Badge, Button, Card, Input, Modal, PageHeader, StatusBadge } from '../components/ui';
 import { SettingsRow, SettingsSection, SettingsToggle } from '../components/ui/SettingsRow';
 import {
@@ -272,13 +271,6 @@ export default function ProfilePage() {
                 </button>
               )}
             </div>
-          </div>
-          <div className="mt-4 pt-4 border-t border-line-subtle flex items-center justify-between text-caption text-content-muted">
-            <span className="flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5" />
-              Member since {user?.created_at ? formatShortDate(user.created_at) : '—'}
-            </span>
-            <span className="font-mono text-micro">ID: {user?.id?.slice(0, 8)}…</span>
           </div>
         </Card>
 
