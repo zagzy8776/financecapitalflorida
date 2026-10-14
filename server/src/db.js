@@ -25,18 +25,42 @@ function sleep(ms) {
 }
 
 /**
+ * Normalize a Postgres connection string for node-pg on Vercel/Neon.
+ * - Forces sslmode=no-verify (we also set ssl.rejectUnauthorized = false)
+ * - Drops channel_binding (ignored / not required by node-pg)
+ * - Never corrupts the database name when rewriting query params
+ */
+function normalizeConnectionString(raw) {
+  if (!raw) return '';
+  try {
+    const u = new URL(raw);
+    // Remove params that confuse or are unnecessary for node-pg
+    u.searchParams.delete('sslmode');
+    u.searchParams.delete('ssl');
+    u.searchParams.delete('channel_binding');
+    u.searchParams.set('sslmode', 'no-verify');
+    return u.toString();
+  } catch {
+    // Fallback for non-standard strings
+    let s = String(raw)
+      .replace(/[?&]sslmode=[^&]*/gi, '')
+      .replace(/[?&]ssl=[^&]*/gi, '')
+      .replace(/[?&]channel_binding=[^&]*/gi, '')
+      .replace(/\?&/, '?')
+      .replace(/&&+/g, '&')
+      .replace(/[?&]$/, '');
+    const join = s.includes('?') ? '&' : '?';
+    return `${s}${join}sslmode=no-verify`;
+  }
+}
+
+/**
  * Build pg Pool config for Neon (or any Postgres).
- * Prefers DATABASE_URL. Forces sslmode=no-verify for Vercel serverless.
+ * Prefers DATABASE_URL.
  */
 function buildConfig() {
-  let connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL || '';
-  if (connectionString) {
-    connectionString = connectionString
-      .replace(/[?&]sslmode=[^&]*/gi, '')
-      .replace(/[?&]ssl=[^&]*/gi, '');
-    const join = connectionString.includes('?') ? '&' : '?';
-    connectionString = `${connectionString}${join}sslmode=no-verify`;
-  }
+  const raw = process.env.DATABASE_URL || process.env.POSTGRES_URL || '';
+  const connectionString = normalizeConnectionString(raw);
   const serverless = !!(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
   return {
     ...(connectionString
