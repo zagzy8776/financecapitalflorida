@@ -6,7 +6,7 @@ Finance Capital Florida is a standalone financial services web application with 
 
 - **Frontend**: React + TypeScript + Vite + Tailwind
 - **Backend**: Node.js + Express + JWT (Vercel serverless via `/api`)
-- **Database**: Aiven for PostgreSQL
+- **Database**: Neon PostgreSQL
 
 ## Features
 
@@ -24,7 +24,7 @@ Finance Capital Florida is a standalone financial services web application with 
 
 ## Setup (local)
 
-1. Copy `.env.example` to `.env` and fill in real values (especially `DATABASE_URL` / `PGPASSWORD` and `JWT_SECRET`).
+1. Copy `.env.example` to `.env` and fill in real values (especially `DATABASE_URL` and `JWT_SECRET`).
 2. Install dependencies:
 
 ```bash
@@ -50,14 +50,19 @@ npm run dev:all
 
 Open http://localhost:5173
 
-### Aiven connection
+### Neon connection
 
 The app reads either:
 
 - `DATABASE_URL` (recommended single string), or
 - split vars: `PGHOST`, `PGPORT`, `PGDATABASE`, `PGUSER`, `PGPASSWORD`
 
-SSL is handled with `sslmode=no-verify` + `rejectUnauthorized: false` so it works cleanly on Vercel serverless (Aiven CA not required at runtime).
+Get your connection string from the Neon Console → Project → Connection Details.
+
+- For **Vercel / serverless**: prefer the **pooled** connection string (host ends with `-pooler`).
+- For local / long-lived processes the non-pooled string is fine.
+
+SSL is handled with `sslmode=no-verify` + `rejectUnauthorized: false` so it works cleanly on Vercel serverless.
 
 **Never commit real passwords.** Set them only in local `.env` and in the Vercel dashboard.
 
@@ -69,7 +74,7 @@ SSL is handled with `sslmode=no-verify` + `rejectUnauthorized: false` so it work
 
 | Name | Example / notes |
 |------|-----------------|
-| `DATABASE_URL` | `postgres://avnadmin:***@credit-credit.k.aivencloud.com:22974/defaultdb?sslmode=require` |
+| `DATABASE_URL` | `postgresql://neondb_owner:***@ep-xxxx-xxxx-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require` |
 | `JWT_SECRET` | long random string |
 | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | optional env-based admin |
 | `OWNER_EMAIL` | optional auto-admin on register |
@@ -82,7 +87,7 @@ SSL is handled with `sslmode=no-verify` + `rejectUnauthorized: false` so it work
 ## First Admin
 
 1. Sign up normally through the UI.
-2. Call the promote endpoint (or run SQL on Aiven):
+2. Call the promote endpoint (or run SQL in the Neon SQL Editor):
 
 ```bash
 curl -X POST https://YOUR-VERCEL-URL/api/admin/promote \
@@ -102,7 +107,7 @@ UPDATE profiles SET role = 'admin' WHERE email = 'your@email.com';
 - Change `JWT_SECRET` in production.
 - All money movements use database transactions.
 - Locked accounts cannot transact.
-- Aiven connection limit is low on free/starter plans — the pool uses `max: 1` on Vercel.
+- Neon free tier includes connection pooling — the pool uses `max: 1` on Vercel to stay within limits.
 
 ## Project Separation
 

@@ -1,7 +1,7 @@
 /**
  * Vercel Serverless Function entry point.
  *
- * The application uses Aiven PostgreSQL. On a cold start, the schema must be
+ * The application uses Neon PostgreSQL. On a cold start, the schema must be
  * ready before an auth/account request is allowed to query it. Cache the
  * migration promise so concurrent requests share the same initialization.
  */

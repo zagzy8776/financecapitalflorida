@@ -25,7 +25,7 @@ function sleep(ms) {
 }
 
 /**
- * Build pg Pool config for Aiven (or any Postgres).
+ * Build pg Pool config for Neon (or any Postgres).
  * Prefers DATABASE_URL. Forces sslmode=no-verify for Vercel serverless.
  */
 function buildConfig() {
