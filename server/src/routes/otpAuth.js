@@ -3,6 +3,8 @@
  * POST /api/auth/login  → password check → OTP emailed → { requires_otp, challenge_id }
  * POST /api/auth/verify-otp → { user, token }
  * POST /api/auth/resend-otp
+ *
+ * OTP is ALWAYS required after a valid password. There is no client-controlled skip.
  */
 import { Router } from 'express';
 import crypto from 'crypto';
@@ -117,31 +119,7 @@ router.post('/api/auth/login', async (req, res) => {
 
     clearFails(em);
 
-    // Trusted device: skip OTP when client asserts a previously remembered device
-    const trustDevice = !!(req.body && req.body.trust_device);
-    if (trustDevice) {
-      await query('UPDATE profiles SET last_login = now() WHERE id = $1', [user.id]).catch(() => {});
-      const sessionClaims = await createSession(user.id, req);
-      const token = signToken(user, sessionClaims);
-      voidEmail(emailLoginAlert({
-        to: user.email,
-        fullName: user.full_name,
-        when: new Date().toUTCString(),
-        ip: req.headers['x-forwarded-for'] || req.ip || '',
-      }));
-      return res.json({
-        user: {
-          id: user.id,
-          email: user.email,
-          full_name: user.full_name,
-          role: user.role,
-          is_locked: user.is_locked,
-        },
-        token,
-        trusted_device: true,
-      });
-    }
-
+    // Always require email OTP — never skip based on client flags
     const code = genCode();
     const challengeId = crypto.randomUUID();
     const expires = new Date(Date.now() + OTP_TTL_MS);
@@ -170,7 +148,8 @@ router.post('/api/auth/login', async (req, res) => {
     if (!sent?.ok) {
       console.error('[login] OTP email failed:', sent?.error || 'unknown');
       return res.status(503).json({
-        error: 'We could not send the verification code. Check your email address or try again in a minute. If this continues, contact support@financecapitals.org.',
+        error:
+          'We could not send the verification code to your email. Check spam, wait a minute, or contact support@financecapitals.org. Sign-in cannot continue without the code.',
         email_error: true,
       });
     }
@@ -259,7 +238,7 @@ router.post('/api/auth/verify-otp', async (req, res) => {
       to: user.email,
       fullName: user.full_name,
       when: new Date().toUTCString(),
-      ip: req.ip,
+      ip: req.headers['x-forwarded-for'] || req.ip || '',
     }));
 
     res.json({ user, token });
