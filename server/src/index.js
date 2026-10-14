@@ -39,7 +39,9 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 
 app.use(cors({ origin: true, credentials: true }));
-app.use(express.json());
+// Avatar uploads send base64 data URIs; default 100kb is too small.
+// Vercel serverless body limit is ~4.5MB — stay under that.
+app.use(express.json({ limit: '4mb' }));
 
 app.use(otpAuthRoutes);
 app.use(withdrawalRoutes);

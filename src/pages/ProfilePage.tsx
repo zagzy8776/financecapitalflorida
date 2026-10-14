@@ -26,6 +26,42 @@ function countryLabel(c?: string) {
   return map[c.toUpperCase()] || c;
 }
 
+/** Resize/compress image client-side so uploads stay under Vercel body limits. */
+function compressImage(file: File, maxEdge = 800, quality = 0.85): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Could not read file'));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('Could not load image'));
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxEdge || height > maxEdge) {
+          if (width >= height) {
+            height = Math.round((height * maxEdge) / width);
+            width = maxEdge;
+          } else {
+            width = Math.round((width * maxEdge) / height);
+            height = maxEdge;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Could not process image'));
+          return;
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.src = String(reader.result || '');
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 export default function ProfilePage() {
   const { user, logout, refresh } = useAuth();
   const navigate = useNavigate();
@@ -67,19 +103,14 @@ export default function ProfilePage() {
       setError('Please choose a JPEG, PNG, or WebP photo.');
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      setError('Photo must be under 5 MB.');
+    if (file.size > 12 * 1024 * 1024) {
+      setError('Photo must be under 12 MB.');
       return;
     }
     setAvatarBusy(true);
     setError('');
     try {
-      const dataUrl = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(String(reader.result || ''));
-        reader.onerror = () => reject(new Error('Could not read file'));
-        reader.readAsDataURL(file);
-      });
+      const dataUrl = await compressImage(file, 800, 0.85);
       await api.uploadAvatar(dataUrl);
       await refresh();
       setSuccess('Profile photo updated.');
