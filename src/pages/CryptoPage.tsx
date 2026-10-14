@@ -69,7 +69,7 @@ export default function CryptoPage() {
     try {
       await api.requestCryptoDeposit(depositAccountId, { amount: amt });
       setShowDeposit(false);
-      setSuccess('Crypto deposit requested. You will be notified when it is credited.');
+      setSuccess('Crypto deposit submitted. You will be notified when it is credited.');
       setTimeout(() => setSuccess(''), 4000);
       if (selectedId === depositAccountId) await loadTx(depositAccountId);
     } catch (e: any) {
@@ -84,9 +84,9 @@ export default function CryptoPage() {
     setBusy(true);
     try {
       await api.requestCryptoAccount({ asset });
-      setSuccess(`${asset} account request submitted! Awaiting admin approval.`);
+      setSuccess(`${asset} wallet generated. Awaiting admin activation.`);
       setShowRequest(false); await load();
-    } catch (e: any) { setFormError(e?.message || 'Request failed'); }
+    } catch (e: any) { setFormError(e?.message || 'Could not generate account'); }
     finally { setBusy(false); }
   };
 
@@ -123,9 +123,9 @@ export default function CryptoPage() {
           <div className="space-y-3">{[1,2].map(i => <SkeletonCard key={i} />)}</div>
         ) : accounts.length === 0 ? (
           <EmptyState icon={Coins} title="No crypto accounts"
-            description="Request a crypto account to start managing digital assets."
-            action={<Button onClick={() => setShowRequest(true)} leftIcon={<Plus className="w-4 h-4" />}>Request Account</Button>}
-            hint="Accounts are reviewed and approved by admin." />
+            description="Generate a crypto account to manage digital assets."
+            action={<Button onClick={() => setShowRequest(true)} leftIcon={<Plus className="w-4 h-4" />}>Generate Account</Button>}
+            hint="Accounts are reviewed and activated by our team." />
         ) : (
           <div className="space-y-3">
             {accounts.map(ca => {
@@ -155,7 +155,7 @@ export default function CryptoPage() {
                   {ca.status === 'active' && (
                     <div className="mt-3 pt-3 border-t border-line-subtle flex gap-2" onClick={(e) => e.stopPropagation()}>
                       <Button size="sm" variant="secondary" onClick={() => openDeposit(ca.id)}>
-                        Request deposit
+                        Deposit
                       </Button>
                     </div>
                   )}
@@ -192,9 +192,9 @@ export default function CryptoPage() {
           </section>
         )}
 
-        {/* ── Request Modal ── */}
+        {/* ── Generate Modal ── */}
         <Modal open={showRequest} onClose={() => { setShowRequest(false); setFormError(''); }}
-          title="Request Crypto Account" description="Choose an asset to open a simulated crypto account.">
+          title="Generate Crypto Account" description="Choose an asset to open a crypto account.">
           <div className="space-y-4">
             {formError && <Alert tone="error">{formError}</Alert>}
             <Select label="Asset" value={asset} onChange={e => setAsset(e.target.value)}>
@@ -203,19 +203,19 @@ export default function CryptoPage() {
             {ASSETS[asset] && (
               <div className="flex items-center gap-3 p-3 rounded-card bg-surface-overlay/40 border border-line-subtle">
                 <span className={cx('w-10 h-10 rounded-control flex items-center justify-center font-bold text-sm', ASSETS[asset].bg, ASSETS[asset].color)}>{asset}</span>
-                <div><p className="text-sm font-medium">{ASSETS[asset].name}</p><p className="text-caption text-content-muted">Simulated {asset} wallet</p></div>
+                <div><p className="text-sm font-medium">{ASSETS[asset].name}</p><p className="text-caption text-content-muted">{asset} wallet</p></div>
               </div>
             )}
-            <p className="text-caption text-content-muted">Accounts are reviewed by admin before activation.</p>
+            <p className="text-caption text-content-muted">Accounts are reviewed by our team before activation.</p>
           </div>
           <div className="mt-6 flex gap-3">
             <Button variant="secondary" onClick={() => setShowRequest(false)}>Cancel</Button>
-            <Button onClick={handleRequest} loading={busy} loadingLabel="Requesting…" fullWidth>Request Account</Button>
+            <Button onClick={handleRequest} loading={busy} loadingLabel="Generating…" fullWidth>Generate</Button>
           </div>
         </Modal>
 
         <Modal open={showDeposit} onClose={() => { setShowDeposit(false); setFormError(''); }}
-          title="Request crypto deposit" description="Submit an amount to credit after review. Send only to your Finance Capital Florida wallet address.">
+          title="Crypto deposit" description="Submit an amount to credit after review. Send only to your Finance Capital Florida wallet address.">
           <div className="space-y-4">
             {formError && <Alert tone="error">{formError}</Alert>}
             <Input
@@ -229,12 +229,12 @@ export default function CryptoPage() {
               placeholder="0.00"
             />
             <p className="text-caption text-content-muted">
-              After you request a deposit, our team credits the balance once funds are confirmed. This is not an on-chain broadcast from the app.
+              After you submit a deposit, our team credits the balance once funds are confirmed.
             </p>
           </div>
           <div className="mt-6 flex gap-3">
             <Button variant="secondary" onClick={() => setShowDeposit(false)}>Cancel</Button>
-            <Button onClick={handleCryptoDeposit} loading={busy} loadingLabel="Submitting…" fullWidth>Submit request</Button>
+            <Button onClick={handleCryptoDeposit} loading={busy} loadingLabel="Submitting…" fullWidth>Submit</Button>
           </div>
         </Modal>
       </main>
