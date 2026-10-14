@@ -1,11 +1,9 @@
 /**
  * Finance Capital Florida database migrations.
  *
- * The migration is deliberately idempotent: it can run against a fresh
- * PostgreSQL database or the database inherited from the original app.
- *
- * Run this on the Render API service at startup. The advisory lock prevents
- * two instances from changing the schema at the same time.
+ * Idempotent: safe on a fresh Neon database or an existing schema.
+ * Uses pg_try_advisory_lock so it works with Neon's transaction-mode pooler
+ * (session-level locks do not work reliably through PgBouncer).
  */
 
 import { query } from './db.js';
@@ -27,15 +25,39 @@ async function index(sql) {
 export async function runMigrations() {
   console.log('[db] Finance Capital Florida migrations starting');
 
-  await query('SELECT pg_advisory_lock($1)', [MIGRATION_LOCK]);
+  // Try-lock is pooler-safe. If another instance holds it, skip and continue
+  // (schema uses IF NOT EXISTS so concurrent runs are still safe).
+  let gotLock = false;
+  try {
+    const lockRes = await query('SELECT pg_try_advisory_lock($1) AS ok', [MIGRATION_LOCK]);
+    gotLock = !!lockRes.rows[0]?.ok;
+  } catch (err) {
+    // If we cannot even reach the DB, surface a clear error
+    const msg = String(err?.message || err);
+    if (/DATABASE_URL|password authentication|ENOTFOUND|ECONNREFUSED|timeout|ssl/i.test(msg)) {
+      const clean = new Error(
+        'Cannot connect to the database. Check that DATABASE_URL is set correctly in Vercel (Neon pooled connection string).'
+      );
+      clean.status = 503;
+      clean.cause = err;
+      throw clean;
+    }
+    throw err;
+  }
+
+  if (!gotLock) {
+    console.log('[db] Another instance is migrating — skipping lock holder work');
+    // Brief wait so the other instance can finish CREATE TABLEs
+    await new Promise((r) => setTimeout(r, 1500));
+    return;
+  }
 
   try {
     await query('CREATE EXTENSION IF NOT EXISTS pgcrypto');
     await query(`CREATE TABLE IF NOT EXISTS schema_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL, applied_at TIMESTAMPTZ NOT NULL DEFAULT now())`);
 
     // -----------------------------------------------------------------------
-    // Core identity tables. These make a brand-new Render/Postgres database
-    // usable without requiring a hidden/manual SQL bootstrap.
+    // Core identity tables
     // -----------------------------------------------------------------------
     await query(`
       CREATE TABLE IF NOT EXISTS profiles (
@@ -201,14 +223,13 @@ export async function runMigrations() {
       ['reviewed_at', 'TIMESTAMPTZ'],
     ]);
 
-    // Normalize nulls created by older schemas before relying on the columns.
     await query(`UPDATE profiles SET role = 'user' WHERE role IS NULL`);
     await query(`UPDATE profiles SET country = 'GB' WHERE country IS NULL OR country = ''`);
     await query(`UPDATE profiles SET kyc_status = 'pending' WHERE kyc_status IS NULL`);
     await query(`UPDATE profiles SET account_status = 'active' WHERE account_status IS NULL`);
     await query(`UPDATE profiles SET session_version = 1 WHERE session_version IS NULL`);
     await query(`UPDATE accounts SET balance = 0 WHERE balance IS NULL`);
-    // Existing deployments created accounts before available_balance existed.\n    // In this application available_balance represents the spendable ledger amount,\n    // so bring it into sync once during migration.\n    await query(`UPDATE accounts SET available_balance = balance WHERE available_balance IS NULL OR available_balance = 0`);
+    await query(`UPDATE accounts SET available_balance = balance WHERE available_balance IS NULL OR available_balance = 0`);
     await query(`UPDATE accounts SET available_balance = COALESCE(balance, 0) WHERE available_balance IS NULL`);
     await query(`UPDATE accounts SET account_type = 'current' WHERE account_type IS NULL OR account_type = ''`);
     await query(`UPDATE accounts SET status = 'active' WHERE status IS NULL OR status = ''`);
@@ -347,7 +368,7 @@ export async function runMigrations() {
     `);
 
     // -----------------------------------------------------------------------
-    // Backwards-compatible account number generator and integrity indexes.
+    // Account number generator and indexes
     // -----------------------------------------------------------------------
     await query(`
       CREATE OR REPLACE FUNCTION generate_account_number()
@@ -394,7 +415,6 @@ export async function runMigrations() {
     await index(`CREATE INDEX IF NOT EXISTS idx_crypto_customer ON crypto_accounts(customer_id)`);
     await index(`CREATE UNIQUE INDEX IF NOT EXISTS idx_crypto_wallet ON crypto_accounts(wallet_address)`);
 
-    // Backfill routing/account metadata for older accounts.
     await query(`UPDATE accounts SET routing_number = '04-00-26' WHERE currency = 'GBP' AND COALESCE(routing_number, '') = ''`);
     await query(`UPDATE accounts SET routing_number = '026009593' WHERE currency = 'USD' AND COALESCE(routing_number, '') = ''`);
     await query(`UPDATE accounts SET routing_number = '20041000' WHERE currency = 'EUR' AND COALESCE(routing_number, '') = ''`);
@@ -403,6 +423,8 @@ export async function runMigrations() {
 
     console.log('[db] Finance Capital Florida migrations complete');
   } finally {
-    await query('SELECT pg_advisory_unlock($1)', [MIGRATION_LOCK]).catch(() => {});
+    if (gotLock) {
+      await query('SELECT pg_advisory_unlock($1)', [MIGRATION_LOCK]).catch(() => {});
+    }
   }
 }
