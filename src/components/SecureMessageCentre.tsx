@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { MessageSquare, X, Send, Shield } from 'lucide-react';
+import { MessageSquare, X, Send } from 'lucide-react';
 import { api, formatDate } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 
@@ -31,11 +31,11 @@ export default function SecureMessageCentre() {
       const data = await api.supportThread();
       setMessages(data.messages || []);
       setReference(data.thread?.reference || '');
-      const fresh = (data.messages || []).filter((m: Msg) => m.sender_role === 'admin').length;
-      if (!open) setUnread(fresh > 0 && (data.messages || []).at(-1)?.sender_role === 'admin' ? 1 : 0);
+      const last = (data.messages || []).at(-1);
+      if (!open && last?.sender_role === 'admin') setUnread(1);
       setError('');
     } catch (err: any) {
-      setError(err?.message || 'Secure messages are unavailable.');
+      setError(err?.message || 'Messaging is temporarily unavailable.');
     }
   };
 
@@ -46,6 +46,15 @@ export default function SecureMessageCentre() {
     return () => window.clearInterval(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hidden, open, user?.id]);
+
+  useEffect(() => {
+    const openDesk = () => {
+      setOpen(true);
+      setUnread(0);
+    };
+    window.addEventListener('finance-open-messages', openDesk);
+    return () => window.removeEventListener('finance-open-messages', openDesk);
+  }, []);
 
   useEffect(() => {
     if (open) scroller.current?.scrollTo({ top: scroller.current.scrollHeight });
@@ -77,22 +86,21 @@ export default function SecureMessageCentre() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-[10px] uppercase tracking-[.16em] text-[#d8b16d]">Finance Capital Florida</p>
-                <h2 className="text-sm font-semibold">Secure Message Centre</h2>
-                <p className="mt-0.5 text-[11px] text-slate-300">{reference || 'Private client desk'}</p>
+                <h2 className="text-sm font-semibold">Message Centre</h2>
+                <p className="mt-0.5 text-[11px] text-slate-300">{reference || 'Private support'}</p>
               </div>
               <button type="button" onClick={() => setOpen(false)} className="rounded-lg p-1 text-slate-300 hover:bg-white/10 hover:text-white" aria-label="Close messages">
                 <X className="h-4 w-4" />
               </button>
             </div>
           </header>
-          <div className="flex items-start gap-2 border-b border-slate-100 bg-[#fbf8f3] px-4 py-2 text-[11px] leading-4 text-slate-600">
-            <Shield className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#b68a45]" />
-            <p>Tied to your signed-in profile. Do not send passwords, PINs, or one-time codes.</p>
+          <div className="border-b border-slate-100 bg-[#fbf8f3] px-4 py-2 text-[11px] leading-4 text-slate-600">
+            Our team typically replies during business hours. How can we help?
           </div>
           <div ref={scroller} className="flex-1 space-y-3 overflow-y-auto bg-slate-50 px-3 py-3">
             {messages.length === 0 && (
               <div className="rounded-xl border border-dashed border-slate-200 bg-white px-3 py-4 text-sm text-slate-500">
-                Write to the bank about a transfer, deposit, or account question. A banker replies from the control centre.
+                Send us a message about your account, a transfer, or a deposit. We&apos;ll get back to you here.
               </div>
             )}
             {messages.map((m) => {
@@ -104,7 +112,7 @@ export default function SecureMessageCentre() {
               return (
                 <div key={m.id} className={mine ? 'flex justify-end' : 'flex justify-start'}>
                   <div className={mine ? 'max-w-[85%] rounded-2xl rounded-br-md bg-[#10243f] px-3 py-2 text-white' : 'max-w-[85%] rounded-2xl rounded-bl-md border border-slate-200 bg-white px-3 py-2 text-[#10243f]'}>
-                    <p className="text-[10px] font-semibold uppercase tracking-wide opacity-70">{mine ? 'You' : 'Banker'}</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wide opacity-70">{mine ? 'You' : 'Support'}</p>
                     <p className="mt-0.5 whitespace-pre-wrap text-sm leading-5">{m.body}</p>
                     <p className="mt-1 text-[10px] opacity-60">{formatDate(m.created_at)}</p>
                   </div>
@@ -121,10 +129,10 @@ export default function SecureMessageCentre() {
               value={draft}
               onChange={(e) => setDraft(e.target.value.slice(0, 2000))}
               rows={2}
-              placeholder="Message the bank…"
+              placeholder="Type your message…"
               className="min-h-[44px] flex-1 resize-none rounded-xl border border-slate-200 px-3 py-2 text-sm text-[#10243f] outline-none focus:border-[#b68a45]"
             />
-            <button type="submit" disabled={sending || draft.trim().length < 2} className="grid h-11 w-11 place-items-center rounded-xl bg-[#10243f] text-white disabled:opacity-40" aria-label="Send secure message">
+            <button type="submit" disabled={sending || draft.trim().length < 2} className="grid h-11 w-11 place-items-center rounded-xl bg-[#10243f] text-white disabled:opacity-40" aria-label="Send message">
               <Send className="h-4 w-4" />
             </button>
           </form>

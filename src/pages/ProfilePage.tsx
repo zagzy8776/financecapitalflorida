@@ -8,12 +8,9 @@ import { Badge, Button, Card, Input, Modal, PageHeader, StatusBadge } from '../c
 import { SettingsRow, SettingsSection, SettingsToggle } from '../components/ui/SettingsRow';
 import {
   Bell, Calendar, Globe2, HelpCircle, KeyRound, Landmark,
-  Camera, LifeBuoy, Lock, LogOut, Mail, MapPin, Phone, ShieldCheck, Smartphone,
+  Camera, LifeBuoy, Lock, LogOut, Mail, MapPin, MessageSquare, Phone, ShieldCheck, Smartphone,
   User, FileText, Scale, Info,
 } from 'lucide-react';
-
-const SUPPORT_WHATSAPP = '+19412831579';
-const SUPPORT_WHATSAPP_LINK = 'https://wa.me/19412831579';
 
 function getInitials(name?: string) {
   if (!name) return '?';
@@ -210,6 +207,10 @@ export default function ProfilePage() {
     }
   };
 
+  const openMessages = () => {
+    window.dispatchEvent(new Event('finance-open-messages'));
+  };
+
   return (
     <div className="finance-page finance-profile">
       <PageHeader title="Profile & Settings" backTo="/dashboard" />
@@ -312,10 +313,10 @@ export default function ProfilePage() {
 
         <SettingsSection title="Support & Legal">
           <SettingsRow
-            icon={Phone}
-            label="WhatsApp"
-            value={SUPPORT_WHATSAPP}
-            onClick={() => { window.location.href = SUPPORT_WHATSAPP_LINK; }}
+            icon={MessageSquare}
+            label="Message us"
+            value="Chat with support"
+            onClick={openMessages}
           />
           <SettingsRow icon={LifeBuoy} label="Email support" value="support@financecapitals.org" onClick={() => { window.location.href = 'mailto:support@financecapitals.org'; }} />
           <SettingsRow icon={HelpCircle} label="Help Centre" value="FAQs & guides" onClick={() => navigate('/disclosures')} />
