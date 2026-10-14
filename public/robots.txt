@@ -1,0 +1,22 @@
+# Finance Capital Florida — https://www.financecapitals.org
+User-agent: *
+Allow: /
+Allow: /login
+Allow: /signup
+Allow: /terms
+Allow: /privacy
+Allow: /disclosures
+Allow: /forgot-password
+
+# Private client & admin areas
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /profile
+Disallow: /accounts
+Disallow: /transfer
+Disallow: /deposit
+Disallow: /crypto
+Disallow: /transactions
+Disallow: /api/
+
+Sitemap: https://www.financecapitals.org/sitemap.xml
