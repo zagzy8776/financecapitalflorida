@@ -97,9 +97,9 @@ export default function ForgotPasswordPage() {
         </div>
 
         <p className="mt-6 text-center text-xs text-[#8a97a7]">
-          Need help?{' '}
-          <a href="https://wa.me/19412831579" className="underline hover:text-[#0c1b33]">
-            WhatsApp support
+          Need help? Email{' '}
+          <a href="mailto:support@financecapitals.org" className="underline hover:text-[#0c1b33]">
+            support@financecapitals.org
           </a>
         </p>
       </div>
